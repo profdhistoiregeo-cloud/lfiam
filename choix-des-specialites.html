@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cap Spécialités</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d2433; --muted:#5d6577; --line:#e3ded3;
+  --accent:#2f5bd3; --accent-2:#e8613c; --accent-soft:#e7edfc; --ok:#1f9d6b; --warn:#d99a1b; --low:#b9bfcc; --bad:#c8443b;
+  --shadow:0 2px 10px rgba(20,25,40,.07);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141821; --card:#1d2230; --ink:#eef1f7; --muted:#a3abbd; --line:#2d3446;
+    --accent:#7d9cff; --accent-2:#ff8a63; --accent-soft:#25304d; --low:#4a5266; --bad:#ff7b72; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141821; --card:#1d2230; --ink:#eef1f7; --muted:#a3abbd; --line:#2d3446;
+  --accent:#7d9cff; --accent-2:#ff8a63; --accent-soft:#25304d; --low:#4a5266; --bad:#ff7b72; --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;line-height:1.5}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.bar{max-width:1150px;margin:0 auto;padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.15rem;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.logo span.dot{width:24px;height:24px;border-radius:50%;background:conic-gradient(var(--accent) 0 40%,var(--accent-2) 40% 70%,var(--ok) 70%);display:inline-block}
+nav{display:flex;gap:2px;flex-wrap:wrap;width:100%;order:3}
+nav button{background:none;border:0;color:var(--muted);font:inherit;font-size:.93rem;padding:6px 10px;border-radius:8px;cursor:pointer}
+nav button.active,nav button:hover{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+textarea{width:100%;min-height:80px;resize:vertical}
+input[type=text]{width:100%}
+label.f{display:block;font-weight:600;margin:10px 0 4px}
+main{max-width:1150px;margin:0 auto;padding:22px 16px 60px}
+section{display:none}section.show{display:block}
+h1{font-size:clamp(1.5rem,4vw,2.3rem);line-height:1.15;margin:.2em 0 .4em;letter-spacing:-.02em}
+h2{font-size:1.35rem;margin:1.2em 0 .5em}
+h3{margin:.2em 0}
+p.lead{color:var(--muted);font-size:1.03rem;max-width:760px}
+.hero{background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid var(--line);border-radius:18px;padding:26px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(175px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);color:var(--ink);text-align:left;font:inherit}
+.click{cursor:pointer;transition:transform .12s,border-color .12s}
+.click:hover{transform:translateY(-2px);border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.small{padding:6px 10px;font-size:.9rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spec{width:100%}
+.spec .ico{font-size:1.5rem}
+.spec .nm{font-weight:700;margin-top:4px}
+.spec .sh{font-size:.85rem;color:var(--muted)}
+.spec.sel{border:2px solid var(--accent);background:var(--accent-soft)}
+.spec.drop{opacity:.5}
+.spec.drop .nm{text-decoration:line-through}
+.badge{display:inline-block;font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.badge.or{background:var(--accent-2);color:#fff}
+.steps{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.step{padding:6px 12px;border-radius:99px;border:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.step.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dom{border-left:6px solid var(--low)}
+.dom.l3{border-left-color:var(--ok)}.dom.l2{border-left-color:var(--accent)}.dom.l1{border-left-color:var(--warn)}
+.meter{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.meter.b i{background:var(--accent-2)}
+.dom.l3 .meter i{background:var(--ok)}.dom.l1 .meter i{background:var(--warn)}.dom.l0 .meter i{background:var(--low)}
+details summary{cursor:pointer;font-weight:600;color:var(--accent);margin-top:6px}
+ul.tight{margin:.3em 0;padding-left:1.2em}
+.note{font-size:.9rem;color:var(--muted);background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin-top:10px}
+.q{font-size:1.15rem;font-weight:700;margin:6px 0 14px}
+.opt{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 14px;margin:8px 0;font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt.on{border:2px solid var(--accent);background:var(--accent-soft)}
+.opt.good{border:2px solid var(--ok)}.opt.badc{border:2px solid var(--bad)}
+.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:10px 0 18px}
+.progress i{display:block;height:100%;background:var(--accent-2);transition:width .2s}
+.likert{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+@media (max-width:560px){.likert{grid-template-columns:1fr 1fr}}
+.res-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.res-row .lbl{width:200px;flex-shrink:0;font-size:.93rem}
+.res-row .meter{flex:1;margin:0}
+.res-row .val{width:44px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:4px 10px;border-radius:99px;border:1px solid var(--line);font-size:.88rem;background:var(--card)}
+.chip.key{border-color:var(--ok);font-weight:600}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.show{display:flex}
+.modal .card{max-width:640px;width:100%;max-height:88vh;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft)}
+.tablewrap{overflow-x:auto}
+.cmp{display:grid;grid-template-columns:minmax(150px,1.3fr) 1fr 1fr;gap:6px 12px;align-items:center}
+.cmp .h{font-weight:700}
+.tl{border-left:3px solid var(--accent);margin-left:8px;padding-left:18px}
+.tl .it{position:relative;margin:0 0 14px}
+.tl .it:before{content:"";position:absolute;left:-26px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--accent-2);border:3px solid var(--bg)}
+.lyc-banner{font-size:.88rem;color:var(--muted);margin:-4px 0 12px}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px 16px 40px}
+.print-only{display:none}
+@media (max-width:600px){.res-row .lbl{width:125px;font-size:.84rem}.cmp{grid-template-columns:1fr 1fr 1fr;font-size:.85rem}}
+@media print{
+  header,nav,.noprint,footer{display:none!important}
+  section{display:none!important}section.print{display:block!important}
+  body{background:#fff;color:#000}.card{box-shadow:none;break-inside:avoid}
+  .print-only{display:block}.screen-only{display:none!important}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="logo"><span class="dot"></span>Cap Spécialités</div>
+    <div class="tools">
+      <label for="lyceeSel" style="font-size:.9rem;color:var(--muted)">Établissement :</label>
+      <select id="lyceeSel"></select>
+      <button class="btn ghost small" id="themeBtn" title="Changer de thème">◐</button>
+    </div>
+    <nav id="nav">
+      <button data-s="home" class="active">Accueil</button>
+      <button data-s="explore">Explorer</button>
+      <button data-s="projet">Mon projet</button>
+      <button data-s="compare">Comparer</button>
+      <button data-s="specs">Spécialités</button>
+      <button data-s="tests">Tests &amp; quiz</button>
+      <button data-s="reperes">Repères</button>
+      <button data-s="fiche">Ma fiche</button>
+      <button data-s="prof">Enseignant</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ACCUEIL -->
+<section id="home" class="show">
+  <div class="hero">
+    <span class="badge">Lycée général · Seconde → Première → Terminale</span>
+    <h1>Quelles spécialités pour quel avenir ?</h1>
+    <p class="lead">Choisis 3 spécialités pour la Première, puis les 2 que tu garderas en Terminale. Découvre ensuite les domaines d'études et les métiers vers lesquels ta combinaison ouvre le plus de portes. Tu peux aussi partir d'un métier pour trouver les spécialités adaptées, ou commencer par un test.</p>
+    <p class="lyc-banner" id="homeLyc"></p>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" data-s="explore">Explorer les combinaisons →</button>
+      <button class="btn ghost" data-s="projet">J'ai une idée de métier</button>
+      <button class="btn ghost" data-s="tests">Faire un test</button>
+    </div>
+  </div>
+  <h2>Ce que tu peux faire ici</h2>
+  <div class="grid g3">
+    <button class="card click" data-s="explore"><h3>🧭 Explorer</h3><p>Choisis ta combinaison et vois les 14 domaines d'études classés du plus au moins adapté.</p></button>
+    <button class="card click" data-s="projet"><h3>🎯 Mon projet</h3><p>Pars d'une formation ou d'un métier : on te propose les combinaisons les plus cohérentes.</p></button>
+    <button class="card click" data-s="compare"><h3>⚖️ Comparer</h3><p>Mets deux combinaisons côte à côte pour voir ce qui change.</p></button>
+    <button class="card click" data-s="tests"><h3>🧩 Tests &amp; quiz</h3><p>Deux tests de personnalité et un quiz sur les idées reçues.</p></button>
+    <button class="card click" data-s="reperes"><h3>📅 Repères</h3><p>Le calendrier de l'orientation, et où poursuivre ses études : France, Maroc, international.</p></button>
+    <button class="card click" data-s="fiche"><h3>📝 Ma fiche</h3><p>Ta synthèse à imprimer pour l'entretien avec ton professeur principal ou tes parents.</p></button>
+  </div>
+  <div class="note" style="margin-top:18px">⚠️ Cet outil donne des <strong>tendances</strong>, pas des obligations : la plupart des formations sont accessibles avec plusieurs combinaisons. Vérifie toujours les attendus des formations sur Parcoursup et parles-en avec ton professeur principal ou un psychologue de l'Éducation nationale.</div>
+</section>
+
+<!-- EXPLORER -->
+<section id="explore">
+  <h1>Explorer une combinaison</h1>
+  <p class="lyc-banner lycLbl"></p>
+  <div class="steps"><span class="step" id="st1">1 · Choisir 3 spécialités (Première)</span><span class="step" id="st2">2 · En abandonner 1 (Terminale)</span><span class="step" id="st3">3 · Découvrir les domaines</span></div>
+  <p id="exploreHint" class="lead"></p>
+  <div class="grid g4" id="specPicker"></div>
+  <div class="row noprint" style="margin-top:14px">
+    <button class="btn ghost small" data-act="resetCombo">↺ Recommencer</button>
+    <button class="btn ghost small" data-act="print" data-sec="explore">🖨 Imprimer le résultat</button>
+  </div>
+  <div id="domainResults"></div>
+</section>
+
+<!-- PROJET -->
+<section id="projet">
+  <h1>J'ai une idée de formation ou de métier</h1>
+  <p class="lead">Choisis un projet : la page t'indique les spécialités conseillées et les combinaisons les plus cohérentes parmi celles proposées dans l'établissement sélectionné.</p>
+  <p class="lyc-banner lycLbl"></p>
+  <select id="projSel" style="max-width:100%;min-width:280px"></select>
+  <div id="projOut" style="margin-top:16px"></div>
+</section>
+
+<!-- COMPARER -->
+<section id="compare">
+  <h1>Comparer deux combinaisons de Terminale</h1>
+  <p class="lyc-banner lycLbl"></p>
+  <div class="grid g2">
+    <div class="card"><h3><span class="badge">A</span> Combinaison A</h3><div class="row" style="margin-top:8px"><select id="ca1"></select><span>+</span><select id="ca2"></select></div></div>
+    <div class="card"><h3><span class="badge or">B</span> Combinaison B</h3><div class="row" style="margin-top:8px"><select id="cb1"></select><span>+</span><select id="cb2"></select></div></div>
+  </div>
+  <div id="cmpOut" class="card" style="margin-top:14px"></div>
+</section>
+
+<!-- SPECIALITES -->
+<section id="specs">
+  <h1>Les spécialités</h1>
+  <p class="lead">Clique sur une spécialité pour voir son contenu, les qualités attendues et les débouchés.</p>
+  <p class="lyc-banner lycLbl"></p>
+  <div class="grid g3" id="specList"></div>
+  <div id="specOthers"></div>
+</section>
+
+<!-- TESTS -->
+<section id="tests">
+  <div id="testMenu">
+    <h1>Tests &amp; quiz</h1>
+    <p class="lead">Réponds spontanément : il n'y a pas de bonne ou de mauvaise réponse aux tests. Les résultats tiennent compte de l'établissement sélectionné.</p>
+    <div class="grid g3">
+      <div class="card"><span class="badge">18 questions · 6 min</span><h3 style="margin-top:8px">Pour quelles spécialités es-tu fait·e ?</h3><p>Tes goûts, ta façon de travailler, ce qui te motive… et les spécialités qui te correspondent.</p><button class="btn" data-test="spe">Commencer</button></div>
+      <div class="card"><span class="badge">30 affirmations · 6 min</span><h3 style="margin-top:8px">Mon profil d'intérêts</h3><p>Inspiré du modèle RIASEC : six grands types d'intérêts reliés à des domaines d'études.</p><button class="btn" data-test="riasec">Commencer</button></div>
+      <div class="card"><span class="badge">12 questions · 4 min</span><h3 style="margin-top:8px">Vrai ou faux ? Les idées reçues</h3><p>« Il faut NSI pour faire de l'informatique »… Vraiment ? Teste tes connaissances sur les spécialités.</p><button class="btn" data-test="quiz">Commencer</button></div>
+    </div>
+  </div>
+  <div id="testRun" style="display:none"></div>
+</section>
+
+<!-- REPERES -->
+<section id="reperes">
+  <h1>Repères</h1>
+  <h2>📅 Le calendrier de l'orientation</h2>
+  <p class="lead">Les grandes étapes, de la Seconde jusqu'aux vœux post-bac. Les dates précises changent chaque année : vérifie-les auprès de ton lycée et sur parcoursup.fr.</p>
+  <div class="grid g3" id="timeline"></div>
+  <h2>🌍 Poursuivre ses études après le bac</h2>
+  <div class="grid g3" id="etudes"></div>
+</section>
+
+<!-- MA FICHE -->
+<section id="fiche">
+  <h1>Ma fiche de synthèse</h1>
+  <p class="lead screen-only">Remplis ta fiche puis imprime-la pour l'apporter à ton entretien d'orientation. Tout reste enregistré dans ce navigateur, sur cet appareil.</p>
+  <div class="grid g2 screen-only">
+    <div class="card">
+      <label class="f" for="fPrenom">Prénom et nom</label><input type="text" id="fPrenom" data-f="prenom">
+      <label class="f" for="fClasse">Classe</label><input type="text" id="fClasse" data-f="classe" placeholder="ex. 2nde 4">
+      <label class="f" for="fForts">Mes points forts (matières, qualités)</label><textarea id="fForts" data-f="forts"></textarea>
+      <label class="f" for="fInterets">Ce qui m'intéresse, ce que j'aime faire</label><textarea id="fInterets" data-f="interets"></textarea>
+      <label class="f" for="fProjets">Projets d'études ou métiers envisagés</label><textarea id="fProjets" data-f="projets"></textarea>
+      <label class="f" for="fQuestions">Mes questions pour mon professeur principal</label><textarea id="fQuestions" data-f="questions"></textarea>
+    </div>
+    <div class="card" id="ficheAuto"></div>
+  </div>
+  <div class="row screen-only noprint" style="margin-top:14px">
+    <button class="btn" data-act="print" data-sec="fiche">🖨 Imprimer ma fiche</button>
+    <button class="btn ghost" data-act="exportCode">📤 Obtenir mon code pour l'enseignant</button>
+    <button class="btn ghost" data-act="clearAll">🗑 Tout effacer</button>
+  </div>
+  <div id="codeBox" class="screen-only"></div>
+  <div class="print-only" id="ficheprint"></div>
+</section>
+
+<!-- ENSEIGNANT -->
+<section id="prof">
+  <h1>Espace enseignant</h1>
+  <p class="lead">Chaque élève obtient un code dans « Ma fiche » (bouton « Obtenir mon code »). Il te l'envoie, par exemple par la messagerie de l'ENT ou dans un document partagé. Colle ici tous les codes, un par ligne, pour obtenir une vue d'ensemble de la classe. Aucune donnée ne quitte cet ordinateur.</p>
+  <textarea id="codesIn" style="min-height:140px" placeholder="CAP2:..."></textarea>
+  <div class="row" style="margin-top:10px"><button class="btn" data-act="analyze">Analyser</button><button class="btn ghost" data-act="csv">⬇ Télécharger en CSV</button><button class="btn ghost" data-act="print" data-sec="prof">🖨 Imprimer</button></div>
+  <div id="profOut"></div>
+</section>
+</main>
+
+<div class="modal" id="modal"><div class="card" id="modalBody"></div></div>
+<footer>Cap Spécialités · outil pédagogique d'aide à la réflexion · fonctionne hors ligne</footer>
+
+<script>
+/* ================= DONNÉES ================= */
+const SPECS = {
+  maths:{n:"Mathématiques",i:"📐",sh:"Raisonner, modéliser, calculer",
+    d:"Algèbre, analyse, géométrie, probabilités et algorithmique. Approfondit le raisonnement et la démonstration.",
+    t:["Suites et fonctions","Probabilités et statistiques","Géométrie dans l'espace","Algorithmique et programmation"],
+    q:"Goût pour l'abstraction, rigueur, persévérance face aux problèmes.",
+    o:"Indispensable ou fortement conseillée pour les études scientifiques, l'ingénierie, l'informatique et l'économie. Si tu l'abandonnes en Terminale, l'option « Mathématiques complémentaires » permet d'en garder."},
+  pc:{n:"Physique-chimie",i:"⚗️",sh:"Comprendre la matière et l'énergie",
+    d:"Étude de la matière, des transformations chimiques, du mouvement, des ondes et de l'énergie, avec une grande place à l'expérimentation.",
+    t:["Constitution et transformations de la matière","Mouvement et interactions","Énergie : conversions et transferts","Ondes et signaux"],
+    q:"Curiosité expérimentale, aisance avec le calcul, esprit d'analyse.",
+    o:"Ingénierie, recherche, santé, chimie, énergie, environnement."},
+  svt:{n:"Sciences de la vie et de la Terre",i:"🧬",sh:"Le vivant, la Terre, la santé",
+    d:"Génétique, évolution, géologie, écologie, corps humain et santé. Pratique du raisonnement scientifique et de l'expérimentation.",
+    t:["La Terre, la vie et l'organisation du vivant","Enjeux planétaires contemporains","Corps humain et santé"],
+    q:"Intérêt pour le vivant et l'environnement, sens de l'observation.",
+    o:"Santé, biologie, environnement, agronomie, sport, enseignement."},
+  si:{n:"Sciences de l'ingénieur",i:"⚙️",sh:"Concevoir et innover",
+    d:"Analyse et conception de produits et de systèmes techniques, modélisation, prototypage et projets.",
+    t:["Innovation et démarche de projet","Modélisation et simulation","Énergie et information dans les systèmes","Prototypage"],
+    q:"Goût du concret, des projets en équipe et de la technologie.",
+    o:"Écoles d'ingénieurs, BUT industriels, design industriel, robotique. Se combine très bien avec les Mathématiques."},
+  nsi:{n:"Numérique et sciences informatiques",i:"💻",sh:"Programmer, comprendre le numérique",
+    d:"Programmation (Python), structures de données, algorithmes, réseaux, bases de données, architecture des machines.",
+    t:["Langages et programmation","Données et bases de données","Algorithmique","Réseaux et systèmes"],
+    q:"Logique, autonomie, goût pour la résolution de problèmes.",
+    o:"Informatique, cybersécurité, data science, jeux vidéo, ingénierie."},
+  ses:{n:"Sciences économiques et sociales",i:"📊",sh:"Économie, sociologie, science politique",
+    d:"Fonctionnement des marchés, croissance, inégalités, socialisation, action publique. Lecture et analyse de données chiffrées.",
+    t:["Science économique","Sociologie","Science politique","Regards croisés"],
+    q:"Intérêt pour l'actualité économique et sociale, goût pour l'argumentation et les données.",
+    o:"Économie, gestion, commerce, sciences politiques, droit, sociologie, psychologie."},
+  hggsp:{n:"Histoire-géographie, géopolitique et sciences politiques",i:"🌍",sh:"Comprendre le monde contemporain",
+    d:"Analyse des grands enjeux politiques, géopolitiques et sociaux du monde, en croisant histoire, géographie, géopolitique et science politique.",
+    t:["Démocraties","Puissances internationales","Frontières","Information","Patrimoine","Environnement","Connaissance et pouvoir"],
+    q:"Curiosité pour l'actualité internationale, goût pour la lecture, l'écriture et le débat.",
+    o:"Sciences politiques, droit, journalisme, relations internationales, histoire, géographie, urbanisme."},
+  hlp:{n:"Humanités, littérature et philosophie",i:"📖",sh:"Lire, penser, débattre",
+    d:"Littérature et philosophie croisées, de l'Antiquité à nos jours, autour de grandes questions humaines.",
+    t:["Les pouvoirs de la parole","Les représentations du monde","La recherche de soi","L'humanité en question"],
+    q:"Plaisir de lire et d'écrire, goût de la réflexion et de l'argumentation.",
+    o:"Lettres, philosophie, droit, sciences politiques, journalisme, communication, enseignement."},
+  llcer:{n:"Langues, littératures et cultures étrangères (LLCER)",i:"🗣️",sh:"Une langue et sa culture en profondeur",
+    d:"Approfondissement d'une langue vivante (anglais, espagnol, arabe, allemand…) à travers sa littérature, ses arts et sa culture.",
+    t:["Littérature","Arts et société","Imaginaires","Rencontres"],
+    q:"Aisance et plaisir dans la langue choisie, goût pour la lecture, ouverture culturelle.",
+    o:"Langues, traduction, LEA, commerce international, tourisme, communication, études à l'étranger."},
+  amc:{n:"Anglais, monde contemporain (AMC)",i:"🌐",sh:"L'anglais pour comprendre le monde actuel",
+    d:"Déclinaison de LLCER anglais centrée sur l'actualité : presse, discours, essais, médias, pour analyser les grands enjeux sociaux, politiques, économiques et culturels du monde anglophone.",
+    t:["Savoirs, création, innovation","Représentations","Faire société","Environnements en mutation","Relation au monde"],
+    q:"Bon niveau d'anglais, intérêt pour l'actualité internationale et le débat.",
+    o:"Sciences politiques, commerce international, LEA, journalisme, droit, études à l'étranger."},
+  llca:{n:"Littérature, langues et cultures de l'Antiquité",i:"🏛️",sh:"Latin ou grec ancien",
+    d:"Étude approfondie du latin ou du grec ancien : textes, civilisation, héritage antique dans le monde actuel.",
+    t:["Traduction et lecture de textes","Civilisation antique","Héritage et réception"],
+    q:"Goût pour les langues, l'histoire et l'analyse fine des textes.",
+    o:"Lettres, histoire, archéologie, droit, enseignement."},
+  artspla:{n:"Arts plastiques",i:"🎨",sh:"Créer, expérimenter, analyser les œuvres",
+    d:"Pratique plastique (dessin, peinture, sculpture, photographie, installation, numérique) et culture artistique, de la création à l'analyse d'œuvres.",
+    t:["Pratique plastique","Questionnement artistique","Culture et analyse d'œuvres","Projet personnel"],
+    q:"Créativité, goût pour l'expérimentation et une pratique régulière.",
+    o:"Écoles d'art et de design, DN MADE, architecture, licence arts plastiques, métiers de la culture."},
+  cav:{n:"Cinéma-audiovisuel",i:"🎬",sh:"Analyser et réaliser des films",
+    d:"Analyse filmique, histoire du cinéma et réalisation de projets audiovisuels (écriture, tournage, montage), souvent avec des professionnels.",
+    t:["Écriture et réalisation","Analyse de films","Histoire du cinéma","Métiers de l'audiovisuel"],
+    q:"Cinéphilie, créativité, goût du travail en équipe.",
+    o:"Écoles de cinéma, licence cinéma-audiovisuel, BTS audiovisuel, journalisme, communication."},
+  arts:{n:"Autres arts (musique, théâtre, danse…)",i:"🎭",sh:"Musique, théâtre, danse, histoire des arts, cirque",
+    d:"Selon les lycées : musique, théâtre, danse, histoire des arts ou arts du cirque. Pratique artistique et culture.",
+    t:["Pratique et création","Analyse des œuvres","Projet artistique"],
+    q:"Engagement dans une pratique artistique, sensibilité, goût de la scène.",
+    o:"Conservatoires, licences d'arts du spectacle et de musicologie, métiers du spectacle et de la culture."},
+  bioeco:{n:"Biologie-écologie",i:"🌱",sh:"Écosystèmes et agriculture",
+    d:"Spécialité des lycées agricoles : écologie, agroécologie, biologie humaine et animale, avec beaucoup de terrain.",
+    t:["Écologie et écosystèmes","Agroécologie","Biologie humaine"],
+    q:"Intérêt pour la nature, l'agriculture et le travail de terrain.",
+    o:"Agronomie, environnement, écoles vétérinaires, paysage. Uniquement en lycée agricole."},
+  eppcs:{n:"Éducation physique, pratiques et culture sportives",i:"🏃",sh:"Le sport sous toutes ses facettes",
+    d:"Pratique sportive approfondie et étude du sport : corps, santé, société, métiers du sport.",
+    t:["Pratique physique","Sport et société","Santé et performance","Métiers du sport"],
+    q:"Engagement sportif, intérêt pour le corps et l'entraînement.",
+    o:"STAPS, métiers du sport, paramédical, enseignement en EPS. Proposée dans un nombre limité de lycées."}
+};
+const SPEC_KEYS = Object.keys(SPECS);
+
+const LYCEES = {
+  all:{n:"Offre nationale (toutes)",s:SPEC_KEYS,lbl:"Toutes les spécialités du lycée général sont affichées. Elles ne sont pas toutes proposées dans chaque lycée."},
+  lfiam:{n:"LFIAM (André Malraux)",s:["hggsp","ses","amc","maths","pc","svt","si","nsi"],lbl:"Spécialités enseignées au Lycée Français International André Malraux (LFIAM) : 8 spécialités. Liste à vérifier chaque année auprès du lycée."},
+  descartes:{n:"Lycée Descartes (Rabat)",s:["maths","svt","pc","hggsp","hlp","ses","llcer","amc","cav","artspla","nsi"],lbl:"Spécialités proposées au Lycée Descartes de Rabat : 11 spécialités. Liste à vérifier chaque année auprès du lycée."}
+};
+
+const DOMAINS = {
+  sci:{n:"Sciences fondamentales et recherche",i:"🔬",w:{maths:3,pc:3,svt:2,nsi:1,si:1},
+    f:["Licence de maths, physique, chimie","CPGE scientifiques (MPSI, PCSI…)","Double licence","Magistère, doctorat"],
+    m:["Chercheur·se","Physicien·ne","Chimiste","Actuaire","Professeur·e de sciences"],
+    note:"Maths et Physique-chimie forment la combinaison la plus attendue en CPGE et en licence de physique."},
+  sante:{n:"Santé",i:"🩺",w:{svt:3,pc:3,maths:1,bioeco:2,eppcs:1},
+    f:["PASS ou L.AS (accès aux études de santé)","Instituts de soins infirmiers (IFSI)","Kinésithérapie, ergothérapie","BUT génie biologique"],
+    m:["Médecin","Pharmacien·ne","Sage-femme","Infirmier·e","Kinésithérapeute","Manipulateur·rice en radiologie"],
+    note:"Aucune spécialité n'est obligatoire, mais SVT et Physique-chimie sont les plus utiles pour réussir la première année."},
+  inge:{n:"Ingénierie et industrie",i:"🏗️",w:{maths:3,pc:2,si:3,nsi:2},
+    f:["Écoles d'ingénieurs post-bac","CPGE MPSI, PTSI, MP2I","BUT GMP, GEII, mesures physiques","BTS industriels"],
+    m:["Ingénieur·e","Technicien·ne en bureau d'études","Roboticien·ne","Responsable de production"],
+    note:"Les mathématiques sont quasi indispensables jusqu'en Terminale ; l'option Maths expertes est un atout."},
+  info:{n:"Informatique et numérique",i:"🖥️",w:{nsi:3,maths:3,si:2,pc:1},
+    f:["Licence d'informatique","BUT informatique","CPGE MP2I","Écoles d'informatique, BTS SIO"],
+    m:["Développeur·se","Data scientist","Expert·e en cybersécurité","Administrateur·rice réseaux","Game designer"],
+    note:"NSI est un vrai plus mais n'est pas toujours exigée ; les mathématiques le sont souvent davantage."},
+  envi:{n:"Environnement, agronomie et vivant",i:"🌳",w:{svt:3,bioeco:3,pc:1,hggsp:1,maths:1},
+    f:["Licence sciences de la vie ou de la Terre","Écoles d'agronomie, écoles vétérinaires","BTSA","BUT génie biologique"],
+    m:["Ingénieur·e agronome","Vétérinaire","Chargé·e d'études environnement","Géologue","Paysagiste"],note:""},
+  eco:{n:"Économie, gestion et commerce",i:"💼",w:{ses:3,maths:2,amc:2,hggsp:1,llcer:1},
+    f:["Licence d'économie-gestion","Écoles de commerce","CPGE économiques (ECG)","BUT GEA, TC","BTS commerciaux"],
+    m:["Expert·e-comptable","Contrôleur·se de gestion","Chargé·e de marketing","Banquier·e","Responsable RH"],
+    note:"Pour l'économie et la prépa ECG, garder des mathématiques (spécialité ou Maths complémentaires) est très conseillé."},
+  droit:{n:"Droit et science politique",i:"⚖️",w:{hggsp:3,ses:2,hlp:2,amc:1,llcer:1,llca:1},
+    f:["Licence de droit","Instituts d'études politiques (IEP)","Double licence droit-langues","BUT carrières juridiques"],
+    m:["Avocat·e","Magistrat·e","Notaire","Juriste d'entreprise","Commissaire de police"],
+    note:"Aucune spécialité n'est exigée en droit ; la qualité de l'expression écrite compte beaucoup."},
+  intl:{n:"Relations internationales, langues appliquées, tourisme",i:"✈️",w:{amc:3,llcer:3,hggsp:3,ses:2,hlp:1},
+    f:["Licence LEA (langues étrangères appliquées)","IEP, licences de sciences politiques","Écoles de commerce à vocation internationale","BTS et BUT tourisme"],
+    m:["Diplomate","Chargé·e d'affaires internationales","Interprète","Responsable export","Conseiller·ère en tourisme"],
+    note:"Une très bonne maîtrise de l'anglais, et si possible d'une autre langue, est un atout décisif."},
+  lettres:{n:"Lettres et langues",i:"✒️",w:{hlp:3,llcer:3,llca:2,amc:2,hggsp:1,cav:1,arts:1},
+    f:["Licence de lettres","Licence LLCER","CPGE littéraires","Écoles de traduction (souvent après une licence)"],
+    m:["Traducteur·rice","Professeur·e de lettres ou de langues","Éditeur·rice","Bibliothécaire"],note:""},
+  shs:{n:"Sciences humaines et sociales",i:"🧠",w:{hggsp:3,ses:2,hlp:2,llca:1,svt:1,amc:1},
+    f:["Licence d'histoire, de géographie, de sociologie, de psychologie","CPGE littéraires","Licence sciences de l'éducation"],
+    m:["Psychologue","Historien·ne, archéologue","Urbaniste","Professeur·e des écoles","Travailleur·se social·e"],
+    note:"La psychologie comporte une part importante de statistiques et de biologie."},
+  com:{n:"Communication, journalisme et médias",i:"📰",w:{hlp:2,hggsp:2,llcer:2,amc:2,cav:2,ses:1,artspla:1,nsi:1},
+    f:["Licence information-communication","IEP","BUT information-communication","Écoles de journalisme (souvent après une licence)"],
+    m:["Journaliste","Chargé·e de communication","Community manager","Attaché·e de presse","Monteur·se vidéo"],note:""},
+  arts:{n:"Arts, design et culture",i:"🖌️",w:{artspla:3,cav:3,arts:3,hlp:1,llcer:1,nsi:1,si:1},
+    f:["Écoles d'art et de design","Licence arts plastiques, musicologie, cinéma","DN MADE","Conservatoires, écoles de cinéma"],
+    m:["Designer","Graphiste","Réalisateur·rice","Comédien·ne","Médiateur·rice culturel·le"],
+    note:"Un portfolio ou un dossier de travaux personnels est souvent demandé."},
+  sport:{n:"Sport et activité physique",i:"🏅",w:{eppcs:3,svt:2,ses:1,pc:1},
+    f:["Licence STAPS","BPJEPS","BUT métiers du sport (selon les établissements)"],
+    m:["Professeur·e d'EPS","Coach sportif","Préparateur·rice physique","Éducateur·rice sportif·ve"],
+    note:"En STAPS, SVT est souvent un atout pour les enseignements de physiologie."},
+  archi:{n:"Architecture, urbanisme et paysage",i:"🏘️",w:{artspla:2,maths:2,si:2,pc:1,hggsp:1,arts:1},
+    f:["Écoles nationales supérieures d'architecture (ENSA)","Écoles de paysage","BTS bâtiment, BUT génie civil"],
+    m:["Architecte","Urbaniste","Paysagiste","Architecte d'intérieur","Conducteur·rice de travaux"],note:""}
+};
+const DOM_KEYS = Object.keys(DOMAINS);
+
+/* Test 1 : 18 questions, chaque spécialité apparaît dans 5 à 7 réponses */
+const T1 = [
+  {q:"Un samedi libre, tu préfères…",o:[["Résoudre une énigme ou un jeu de logique",{maths:2,nsi:1}],["Bricoler, démonter, faire une expérience",{pc:2,si:1}],["Lire un roman ou écrire",{hlp:2,llca:1}],["Faire du sport ou une sortie nature",{eppcs:2,bioeco:1}]]},
+  {q:"Tu regardes plutôt une vidéo sur…",o:[["La nature, les animaux, le corps humain",{svt:2,bioeco:1}],["La géopolitique, un débat politique",{hggsp:2,amc:1}],["La façon dont un film a été tourné",{cav:3}],["La tech, l'espace, les inventions",{nsi:1,pc:1,si:1}]]},
+  {q:"Dans un projet de groupe, tu prends naturellement le rôle de…",o:[["Celui ou celle qui organise et gère le budget",{ses:2,maths:1}],["Celui ou celle qui fabrique la maquette",{si:2,artspla:1}],["Celui ou celle qui rédige et argumente",{hlp:2,hggsp:1}],["Celui ou celle qui code le site ou l'appli",{nsi:3}]]},
+  {q:"Parmi ces matières, laquelle te plaît le plus ?",o:[["Mathématiques",{maths:3}],["Physique-chimie",{pc:3}],["SVT",{svt:3}],["Histoire-géographie",{hggsp:3}]]},
+  {q:"Et parmi celles-ci ?",o:[["Français",{hlp:3}],["Anglais",{amc:2,llcer:1}],["Une autre langue vivante",{llcer:3}],["Latin ou grec",{llca:3}]]},
+  {q:"Et parmi celles-ci ?",o:[["SES",{ses:3}],["EPS",{eppcs:3}],["Arts plastiques",{artspla:3}],["Musique, théâtre ou danse",{arts:3}]]},
+  {q:"Et enfin parmi celles-ci ?",o:[["Technologie",{si:3}],["SNT, informatique",{nsi:2,maths:1}],["Les sorties sur le terrain, le jardin, les animaux",{bioeco:3}],["L'option ou le club cinéma, vidéo",{cav:2,artspla:1}]]},
+  {q:"Ce qui te motive le plus, c'est…",o:[["Comprendre comment fonctionne le monde physique",{pc:2,maths:1}],["Comprendre comment fonctionnent les sociétés",{ses:2,hggsp:1}],["Créer quelque chose de beau ou d'original",{artspla:2,arts:1}],["Préserver l'environnement et le vivant",{bioeco:2,svt:2}]]},
+  {q:"Face à un problème difficile, tu…",o:[["Cherches la logique, la formule",{maths:2,nsi:1}],["Testes concrètement plusieurs solutions",{si:2,pc:1}],["Te documentes et compares les points de vue",{hggsp:2,hlp:1}],["En discutes avec les autres",{ses:1,eppcs:1,amc:1}]]},
+  {q:"Ton voyage idéal ?",o:[["Une immersion pour parler la langue du pays",{llcer:2,amc:1}],["Visiter des sites antiques",{llca:2,hggsp:1}],["Un parc national, une ferme, la montagne",{bioeco:2,svt:1}],["Un festival de cinéma, de musique ou de théâtre",{cav:1,arts:2}]]},
+  {q:"Dans l'actualité, tu t'intéresses surtout à…",o:[["Les élections, les conflits, les relations entre pays",{hggsp:2,amc:1}],["L'économie, l'emploi, les inégalités",{ses:3}],["Le climat, la santé, la biodiversité",{svt:2,pc:1}],["L'intelligence artificielle, le numérique",{nsi:2,si:1}]]},
+  {q:"Le type de travail scolaire que tu préfères…",o:[["Un exercice avec une réponse juste à trouver",{maths:2,pc:1}],["Une dissertation, une réflexion ouverte",{hlp:2,llca:1}],["Un TP en laboratoire",{svt:2,pc:2}],["Un exposé oral ou un projet pratique",{eppcs:1,arts:1,si:1}]]},
+  {q:"Si tu devais rêver d'un métier…",o:[["Ingénieur·e ou chercheur·se",{maths:1,pc:1,si:1}],["Médecin, vétérinaire, kiné",{svt:2,pc:1,eppcs:1}],["Avocat·e, journaliste, diplomate",{hggsp:1,amc:1,hlp:1}],["Réalisateur·rice, designer, artiste",{cav:1,artspla:1,arts:1}]]},
+  {q:"Tu aimerais apprendre à…",o:[["Entraîner et encadrer une équipe sportive",{eppcs:3}],["Programmer un robot",{si:1,nsi:2}],["Traduire des textes anciens",{llca:3}],["Réaliser un court-métrage",{cav:3}]]},
+  {q:"Les langues, pour toi…",o:[["J'adore lire et regarder des séries en VO",{llcer:2,amc:1}],["Je débattrais volontiers en anglais de l'actualité",{amc:3}],["L'origine des mots me passionne",{llca:2,hlp:1}],["Ce n'est pas mon point fort",{maths:1,pc:1,svt:1}]]},
+  {q:"Tes amis te décrivent plutôt comme…",o:[["Rigoureux·se et logique",{maths:2,pc:1}],["Curieux·se de tout",{hggsp:1,hlp:1,svt:1}],["Créatif·ve et imaginatif·ve",{artspla:2,arts:1}],["Dynamique, meneur·se",{eppcs:2,ses:1}]]},
+  {q:"Ton stage de rêve se passerait…",o:[["Dans un laboratoire ou un hôpital",{svt:2,pc:1}],["Dans une entreprise ou une ONG internationale",{ses:2,amc:1}],["Dans un atelier ou un fablab",{si:1,artspla:1,nsi:1}],["Dans un théâtre ou une salle de concert",{arts:3}]]},
+  {q:"Sur ton téléphone ou ton ordinateur, tu…",o:[["Crées des vidéos ou des photos",{cav:2,artspla:1}],["Joues et cherches à comprendre comment marchent les jeux",{nsi:2,maths:1}],["Lis des articles ou écoutes des podcasts d'actualité",{hggsp:1,ses:1,llcer:1}],["Utilises des applis de sport ou de nature",{eppcs:2,bioeco:1}]]}
+];
+
+/* Test 2 : RIASEC, 5 affirmations par type */
+const RIA = {
+  R:{n:"Réaliste",d:"Tu aimes le concret, manipuler, fabriquer, être actif·ve et voir le résultat de ton travail.",s:["si","pc","bioeco","eppcs","svt"],dm:["inge","envi","sport","archi"]},
+  I:{n:"Investigateur",d:"Tu aimes comprendre, analyser, chercher, résoudre des problèmes complexes.",s:["maths","pc","svt","nsi"],dm:["sci","sante","info"]},
+  A:{n:"Artistique",d:"Tu aimes créer, t'exprimer, imaginer, sortir des sentiers battus.",s:["artspla","cav","arts","hlp","llcer"],dm:["arts","lettres","com","archi"]},
+  S:{n:"Social",d:"Tu aimes aider, conseiller, transmettre, travailler avec les autres.",s:["ses","hggsp","svt","eppcs","hlp"],dm:["shs","sante","sport"]},
+  E:{n:"Entreprenant",d:"Tu aimes convaincre, diriger, prendre des initiatives et des responsabilités.",s:["ses","hggsp","amc","llcer"],dm:["eco","droit","intl","com"]},
+  C:{n:"Conventionnel",d:"Tu aimes l'organisation, la méthode, la précision et les tâches bien définies.",s:["maths","ses","nsi"],dm:["eco","info","droit"]}
+};
+const T2 = [
+  ["Réparer un vélo ou un appareil en panne","R"],["Construire ou assembler quelque chose de mes mains","R"],["Travailler dehors, sur le terrain","R"],["Utiliser des outils ou des machines","R"],["Pratiquer une activité physique exigeante","R"],
+  ["Comprendre pourquoi un phénomène se produit","I"],["Mener une enquête ou une expérience scientifique","I"],["Résoudre un problème qui demande beaucoup de réflexion","I"],["Lire des articles ou regarder des documentaires scientifiques","I"],["Chercher l'origine d'une panne ou d'un bug","I"],
+  ["Dessiner, composer, jouer la comédie","A"],["Inventer une histoire ou un univers","A"],["Imaginer un décor, un design, une mise en scène","A"],["Réaliser une vidéo ou des photos","A"],["Écrire des textes personnels","A"],
+  ["Expliquer quelque chose à quelqu'un qui ne comprend pas","S"],["M'occuper des autres, les écouter, les aider","S"],["Participer à une association ou une action solidaire","S"],["Faire en sorte que chacun trouve sa place dans un groupe","S"],["Animer une activité pour des plus jeunes","S"],
+  ["Convaincre un groupe de suivre mon idée","E"],["Organiser un événement et en être responsable","E"],["Lancer un petit projet ou une entreprise","E"],["Négocier pour obtenir ce que je veux","E"],["Prendre la parole en public","E"],
+  ["Classer, ranger, organiser des informations","C"],["Suivre une méthode précise, étape par étape","C"],["Tenir un budget ou un tableau de chiffres","C"],["Vérifier un travail pour qu'il ne reste aucune erreur","C"],["Planifier mon emploi du temps à l'avance","C"]
+];
+const LIKERT = [["Pas du tout",0],["Un peu",1],["Assez",2],["Beaucoup",3]];
+
+/* Quiz idées reçues */
+const QUIZ = [
+  {s:"Pour faire médecine, il est obligatoire d'avoir pris SVT et Physique-chimie.",a:false,e:"Aucune spécialité n'est légalement obligatoire pour entrer en PASS ou en L.AS. En pratique, SVT et Physique-chimie sont fortement conseillées pour réussir la première année, très scientifique."},
+  {s:"La spécialité abandonnée en fin de Première ne compte pas pour le bac.",a:false,e:"Sa moyenne de Première compte pour le bac (coefficient 8). Elle reste donc importante jusqu'au bout de l'année !"},
+  {s:"HLP ne mène qu'aux études de lettres.",a:false,e:"HLP est très appréciée en droit, en sciences politiques, en journalisme et en communication : partout où l'on doit lire, argumenter et bien écrire."},
+  {s:"En Terminale, on peut commencer une spécialité qu'on n'avait pas en Première.",a:false,e:"En règle générale, on garde en Terminale 2 des 3 spécialités suivies en Première. Il faut donc bien réfléchir dès la Seconde."},
+  {s:"L'option Mathématiques complémentaires s'adresse aux élèves qui abandonnent la spécialité Maths en Terminale.",a:true,e:"C'est exactement son rôle : garder un bagage mathématique utile en économie, santé, psychologie, STAPS…"},
+  {s:"Il faut avoir suivi NSI pour faire des études d'informatique.",a:false,e:"NSI est un vrai plus, mais beaucoup de formations en informatique regardent surtout le niveau en mathématiques."},
+  {s:"Une école d'ingénieurs post-bac accepte facilement un élève qui a abandonné les maths en Terminale.",a:false,e:"Les mathématiques sont attendues dans la quasi-totalité des formations d'ingénieurs, souvent avec l'option Maths expertes."},
+  {s:"Certaines combinaisons de spécialités sont « interdites ».",a:false,e:"Toutes les combinaisons sont possibles en principe. Les limites viennent de l'offre de chaque lycée et de ses emplois du temps."},
+  {s:"Les formations sélectives regardent aussi les bulletins de Première.",a:true,e:"Le dossier Parcoursup contient les bulletins de Première et ceux de Terminale disponibles au moment des vœux."},
+  {s:"SES, c'est seulement pour ceux qui veulent faire une école de commerce.",a:false,e:"SES ouvre aussi vers l'économie, les sciences politiques, le droit, la sociologie, la psychologie ou le journalisme."},
+  {s:"AMC (Anglais, monde contemporain) est une déclinaison de la spécialité LLCER.",a:true,e:"Oui : c'est la LLCER anglais, orientée vers l'actualité et les enjeux du monde contemporain plutôt que vers la littérature."},
+  {s:"Choisir uniquement les spécialités où l'on a les meilleures notes est toujours la meilleure stratégie.",a:false,e:"Les notes comptent, mais l'intérêt pour la matière et le projet d'études comptent tout autant : on réussit mieux ce qui nous motive."}
+];
+
+/* Mon projet : c = conseillées (a|b = l'une ou l'autre), u = utiles */
+const PROJETS = [
+  {n:"Médecine, pharmacie, maïeutique, kiné (PASS / L.AS)",d:"sante",c:["svt","pc"],u:["maths"],note:"Aucune spécialité n'est obligatoire, mais la première année est très scientifique. Garder des maths (spécialité ou Maths complémentaires) est utile."},
+  {n:"Soins infirmiers (IFSI)",d:"sante",c:["svt"],u:["ses","pc","maths"],note:"Profils variés acceptés ; motivation, sens du contact et rigueur comptent beaucoup."},
+  {n:"Vétérinaire, agronomie",d:"envi",c:["svt","pc"],u:["maths","bioeco"],note:"Formations très sélectives : un bon niveau scientifique général est attendu."},
+  {n:"Biologie, recherche en sciences du vivant",d:"sci",c:["svt","pc|maths"],u:["maths","pc"],note:""},
+  {n:"Environnement, géologie, climat",d:"envi",c:["svt"],u:["pc","hggsp","maths"],note:""},
+  {n:"Chimie",d:"sci",c:["pc","maths"],u:["svt"],note:""},
+  {n:"Prépa scientifique (MPSI, PCSI, MP2I…)",d:"sci",c:["maths","pc|nsi|si"],u:["pc","si","nsi"],note:"Maths avec l'option Maths expertes est quasiment indispensable. MP2I : Maths et NSI ; PTSI : Maths et SI ou PC."},
+  {n:"École d'ingénieurs post-bac",d:"inge",c:["maths","pc|si"],u:["si","nsi","pc"],note:"Maths expertes est un atout important."},
+  {n:"Aéronautique, spatial, pilote",d:"inge",c:["maths","pc"],u:["si"],note:""},
+  {n:"Informatique, cybersécurité (licence, BUT)",d:"info",c:["maths","nsi"],u:["si","pc"],note:"Les maths sont souvent plus déterminantes que NSI."},
+  {n:"Data science, intelligence artificielle",d:"info",c:["maths","nsi"],u:["ses"],note:"Maths expertes recommandée."},
+  {n:"Jeux vidéo",d:"info",c:["nsi","maths|artspla"],u:["artspla","cav","maths"],note:"Côté programmation : Maths et NSI. Côté graphisme : Arts plastiques et un portfolio."},
+  {n:"Architecture",d:"archi",c:["maths|artspla"],u:["artspla","maths","pc","si","hggsp"],note:"Les ENSA recrutent des profils variés ; un intérêt démontré pour l'architecture et les arts compte beaucoup."},
+  {n:"Design, écoles d'art, DN MADE",d:"arts",c:["artspla"],u:["cav","hlp","arts"],note:"Un portfolio de travaux personnels est souvent demandé."},
+  {n:"Cinéma, audiovisuel",d:"arts",c:["cav"],u:["hlp","artspla","llcer"],note:"Les écoles sont très sélectives : montre tes réalisations personnelles."},
+  {n:"Journalisme, communication",d:"com",c:["hggsp","hlp|ses"],u:["ses","amc","llcer","cav"],note:"Les écoles de journalisme recrutent souvent après une licence ; la culture générale compte beaucoup."},
+  {n:"Sciences Po (IEP)",d:"droit",c:["hggsp","ses|hlp"],u:["amc","llcer","maths"],note:"Garder des mathématiques peut être un plus pour certains IEP."},
+  {n:"Droit",d:"droit",c:["hggsp|ses"],u:["ses","hlp","amc","hggsp"],note:"Aucune spécialité n'est exigée ; l'expression écrite est essentielle."},
+  {n:"Relations internationales, diplomatie",d:"intl",c:["hggsp","amc|llcer"],u:["ses","llcer","amc"],note:""},
+  {n:"LEA, commerce international",d:"intl",c:["amc|llcer"],u:["ses","hggsp","llcer"],note:"Deux langues étrangères bien maîtrisées sont attendues."},
+  {n:"Économie (licence)",d:"eco",c:["ses","maths"],u:["hggsp"],note:"Les maths sont très présentes dès la première année."},
+  {n:"Prépa économique (ECG)",d:"eco",c:["maths"],u:["ses","hggsp","amc"],note:"Il faut des mathématiques en Terminale : spécialité Maths ou Maths complémentaires selon la voie choisie."},
+  {n:"École de commerce post-bac",d:"eco",c:["ses|maths"],u:["amc","maths","hggsp","llcer"],note:"Langues, engagement et expériences personnelles sont valorisés."},
+  {n:"Lettres, prépa littéraire",d:"lettres",c:["hlp"],u:["llca","hggsp","llcer"],note:""},
+  {n:"Histoire, géographie, archéologie",d:"shs",c:["hggsp"],u:["hlp","llca","svt","ses"],note:""},
+  {n:"Psychologie",d:"shs",c:["ses|svt"],u:["maths","hlp","svt"],note:"La licence comporte beaucoup de statistiques et de biologie : Maths complémentaires est utile."},
+  {n:"Sociologie, sciences sociales",d:"shs",c:["ses"],u:["hggsp","maths","hlp"],note:""},
+  {n:"Professeur·e des écoles",d:"shs",c:["hlp|ses|hggsp"],u:["maths","svt","hlp"],note:"Métier polyvalent : garder un équilibre entre matières littéraires et scientifiques est un atout."},
+  {n:"Traduction, enseignement des langues",d:"lettres",c:["llcer|amc"],u:["hlp","llcer","amc"],note:""},
+  {n:"STAPS, métiers du sport",d:"sport",c:["svt"],u:["eppcs","pc","ses"],note:"EPPCS est un plus là où elle existe ; SVT aide pour la physiologie."}
+];
+
+const TIMELINE = [
+  {t:"Seconde",i:"①",items:[["Début d'année","Tests de positionnement, découverte des spécialités (présentations, portes ouvertes)."],["2e trimestre","Vœux provisoires de spécialités sur la fiche de dialogue."],["3e trimestre","Choix définitif de 3 spécialités, puis avis du conseil de classe."]]},
+  {t:"Première",i:"②",items:[["Toute l'année","3 spécialités à 4 h par semaine."],["Fin d'année","Choix de la spécialité abandonnée. Sa moyenne de Première compte coefficient 8 au bac."],["Fin d'année","Choix éventuel des options de Terminale : Maths complémentaires, Maths expertes, Droit et grands enjeux du monde contemporain (DGEMC)."],["Juin","Épreuves anticipées de français (écrit et oral)."]]},
+  {t:"Terminale",i:"③",items:[["Décembre – janvier","Découverte des formations sur Parcoursup, salons et journées portes ouvertes."],["Mi-janvier à mi-mars","Inscription et formulation des vœux sur Parcoursup."],["Fin mars – début avril","Finalisation du dossier et confirmation des vœux."],["Juin","Épreuves de spécialité, philosophie et Grand oral."],["Fin mai – juillet","Phase d'admission : réponses des formations."]]}
+];
+const ETUDES = [
+  {t:"🇫🇷 En France",p:["Avec le bac français, on candidate sur Parcoursup comme un élève de France, y compris depuis un lycée français à l'étranger.","Pense au logement et aux bourses : les démarches commencent souvent dès le printemps de Terminale.","Les attendus de chaque formation sont détaillés sur sa fiche Parcoursup."]},
+  {t:"🇲🇦 Au Maroc",p:["Universités publiques, écoles d'ingénieurs et de commerce publiques et privées, campus d'établissements étrangers : chaque établissement a sa propre procédure et son calendrier.","Certaines formations françaises (CPGE, BTS…) existent dans le réseau des établissements français au Maroc.","Renseigne-toi tôt auprès du service d'orientation du lycée : concours et dates limites peuvent tomber avant ceux de Parcoursup."]},
+  {t:"🌐 À l'international",p:["Canada (Québec), Belgique, Espagne, Royaume-Uni, États-Unis… : chaque pays a ses plateformes, ses exigences et ses frais d'inscription.","Un excellent niveau d'anglais, attesté par AMC ou LLCER et parfois par un test de langue, est souvent demandé.","Les candidatures se préparent souvent dès la Première : anticipe."]}
+];
+
+/* ================= ÉTAT & STOCKAGE ================= */
+const store = {
+  get(k){try{return JSON.parse(localStorage.getItem("capspe_"+k))}catch(e){return null}},
+  set(k,v){try{localStorage.setItem("capspe_"+k,JSON.stringify(v))}catch(e){}}
+};
+const S = {
+  lycee: store.get("lycee") || "all",
+  premiere: [], dropped: null,
+  t1: store.get("t1"), t2: store.get("t2"), quiz: store.get("quiz"),
+  fiche: store.get("fiche") || {}, projet: store.get("projet") || "",
+  profRows: []
+};
+const c0 = store.get("combo"); if(c0 && Array.isArray(c0.premiere)){S.premiere=c0.premiere; S.dropped=c0.dropped||null;}
+const avail = ()=> LYCEES[S.lycee].s;
+const isAv = k => avail().includes(k);
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const saveCombo = ()=>store.set("combo",{premiere:S.premiere,dropped:S.dropped});
+
+/* ================= NAVIGATION ================= */
+function show(id){
+  document.querySelectorAll("main section").forEach(s=>s.classList.toggle("show",s.id===id));
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.s===id));
+  if(id==="tests"){ $("#testMenu").style.display="block"; $("#testRun").style.display="none"; }
+  if(id==="fiche") renderFiche();
+  if(id==="compare") renderCompare();
+  if(id==="projet") renderProjet();
+  window.scrollTo(0,0);
+}
+document.addEventListener("click",e=>{
+  const n=e.target.closest("[data-s]"); if(n){show(n.dataset.s);return}
+  const t=e.target.closest("[data-test]"); if(t){startTest(t.dataset.test);return}
+  const c=e.target.closest("[data-combo]"); if(c){loadCombo(c.dataset.combo.split(","),c.dataset.drop||null);return}
+  const sp=e.target.closest("[data-spec]"); if(sp){toggleSpec(sp.dataset.spec);return}
+  const a=e.target.closest("[data-act]"); if(a){act(a.dataset.act,a.dataset);return}
+  if(e.target.id==="modal") closeModal();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+function act(name,d){
+  switch(name){
+    case "resetCombo": S.premiere=[];S.dropped=null;saveCombo();renderPicker();break;
+    case "print": printSec(d.sec);break;
+    case "openSpec": openSpec(d.k);break;
+    case "close": closeModal();break;
+    case "answer": answer(+d.v);break;
+    case "prevQ": if(run.i>0){run.i--;renderQ()}break;
+    case "quizAns": quizAnswer(d.v==="1");break;
+    case "quizNext": run.i++;run.shown=false;renderQ();break;
+    case "clearAll": clearAll();break;
+    case "exportCode": exportCode();break;
+    case "copyCode": copyCode();break;
+    case "analyze": analyzeCodes();break;
+    case "csv": downloadCSV();break;
+  }
+}
+function printSec(id){
+  if(id==="fiche") renderFichePrint();
+  const s=document.getElementById(id); s.classList.add("print"); window.print(); s.classList.remove("print");
+}
+$("#themeBtn").onclick=()=>{
+  const r=document.documentElement, cur=r.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  r.dataset.theme = cur==="dark"?"light":"dark"; store.set("theme",r.dataset.theme);
+};
+(()=>{const t=store.get("theme"); if(t) document.documentElement.dataset.theme=t;})();
+
+/* ================= ÉTABLISSEMENT ================= */
+function initLycee(){
+  const sel=$("#lyceeSel");
+  sel.innerHTML=Object.entries(LYCEES).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join("");
+  sel.value=S.lycee;
+  sel.onchange=()=>{ S.lycee=sel.value; store.set("lycee",S.lycee); applyLycee(); };
+}
+function applyLycee(){
+  const before=S.premiere.length;
+  S.premiere=S.premiere.filter(isAv);
+  if(S.premiere.length!==before) S.dropped=null;
+  if(S.dropped && !S.premiere.includes(S.dropped)) S.dropped=null;
+  saveCombo();
+  const L=LYCEES[S.lycee];
+  document.querySelectorAll(".lycLbl").forEach(el=>el.textContent="🏫 "+L.lbl);
+  $("#homeLyc").textContent="🏫 Établissement sélectionné : "+L.n+" (modifiable en haut de la page).";
+  renderPicker(); renderSpecList(); initCompareSelects(); renderCompare(); renderProjet(); renderFiche();
+  const cur=document.querySelector("main section.show");
+  if(cur && cur.id==="tests" && $("#testRun").style.display==="block" && run && run.done) showResult(run.id);
+}
+
+/* ================= EXPLORER ================= */
+function renderPicker(){
+  const box=$("#specPicker");
+  box.innerHTML=avail().map(k=>{
+    const s=SPECS[k], sel=S.premiere.includes(k);
+    const lab = sel&&S.premiere.length===3 ? `<div style="margin-top:8px"><span class="badge">${S.dropped===k?"Abandonnée en Tle":"Clique pour l'abandonner en Tle"}</span></div>`:"";
+    return `<button class="card click spec${sel?" sel":""}${S.dropped===k?" drop":""}" data-spec="${k}" aria-pressed="${sel}"><div class="ico">${s.i}</div><div class="nm">${s.n}</div><div class="sh">${s.sh}</div>${lab}</button>`;
+  }).join("");
+  const n=S.premiere.length;
+  $("#st1").classList.toggle("on",n<3);
+  $("#st2").classList.toggle("on",n===3&&!S.dropped);
+  $("#st3").classList.toggle("on",n===3&&!!S.dropped);
+  $("#exploreHint").textContent = n<3
+    ? `Sélectionne ${3-n} spécialité${3-n>1?"s":""} de Première.`
+    : (!S.dropped ? "Clique maintenant sur la spécialité que tu abandonnerais en Terminale. Pour l'instant, les résultats portent sur tes 3 spécialités."
+                  : "Voici les domaines d'études ouverts par ta combinaison de Terminale. Clique sur une autre spécialité pour changer, ou sur celle barrée pour la reprendre.");
+  renderDomains();
+}
+function toggleSpec(k){
+  const P=S.premiere;
+  if(P.length===3 && P.includes(k)) S.dropped = S.dropped===k?null:k;
+  else if(P.includes(k)){ S.premiere=P.filter(x=>x!==k); S.dropped=null; }
+  else if(P.length<3) P.push(k);
+  else { P.shift(); P.push(k); S.dropped=null; }
+  saveCombo(); renderPicker();
+}
+function scoreCombo(list){
+  return DOM_KEYS.map(dk=>{
+    const w=DOMAINS[dk].w;
+    const got=list.reduce((a,k)=>a+(w[k]||0),0);
+    const best=Object.values(w).sort((a,b)=>b-a).slice(0,list.length).reduce((a,b)=>a+b,0);
+    return {dk,pct:best?Math.round(got/best*100):0};
+  }).sort((a,b)=>b.pct-a.pct);
+}
+function level(p){return p>=75?[3,"Très favorable"]:p>=45?[2,"Favorable"]:p>=20?[1,"Possible"]:[0,"Peu ciblé"]}
+function comboTips(list,dropped){
+  const tips=[];
+  if(dropped) tips.push(`La moyenne de Première en ${SPECS[dropped].n} comptera <strong>coefficient 8</strong> au bac : elle reste importante jusqu'à la fin de l'année.`);
+  if(dropped==="maths") tips.push("Tu abandonnes les Mathématiques : pense à l'option <strong>Mathématiques complémentaires</strong> si tu vises l'économie, la santé, la psychologie ou le STAPS.");
+  if(list.includes("maths")&&dropped) tips.push("Tu gardes les Mathématiques : l'option <strong>Maths expertes</strong> est conseillée pour les prépas scientifiques et l'ingénierie.");
+  if(!list.includes("maths")&&!dropped) tips.push("Pas de Mathématiques dans ta combinaison : certaines formations (économie, ingénierie, informatique) te seront plus difficiles d'accès.");
+  if(list.includes("hggsp")||list.includes("ses")) if(dropped) tips.push("L'option <strong>DGEMC</strong> (droit et grands enjeux du monde contemporain), si ton lycée la propose, complète bien un projet en droit ou sciences politiques.");
+  if(list.includes("bioeco")) tips.push("Biologie-écologie n'est proposée qu'en lycée agricole.");
+  if(list.includes("eppcs")) tips.push("EPPCS n'est proposée que dans certains lycées.");
+  return tips;
+}
+function domainCards(res){
+  return `<div class="grid g3">`+res.map(({dk,pct})=>{
+    const D=DOMAINS[dk],[lv,lab]=level(pct);
+    return `<div class="card dom l${lv}"><h3>${D.i} ${D.n}</h3>
+      <div class="meter"><i style="width:${Math.max(pct,4)}%"></i></div>
+      <span class="badge">${lab}</span>
+      <details><summary>Formations et métiers</summary>
+        <strong>Exemples de formations</strong><ul class="tight">${D.f.map(x=>`<li>${x}</li>`).join("")}</ul>
+        <strong>Exemples de métiers</strong><ul class="tight">${D.m.map(x=>`<li>${x}</li>`).join("")}</ul>
+        ${D.note?`<div class="note">${D.note}</div>`:""}
+      </details></div>`;
+  }).join("")+`</div>`;
+}
+function renderDomains(){
+  const box=$("#domainResults");
+  if(S.premiere.length<3){box.innerHTML="";return}
+  const list = S.dropped? S.premiere.filter(x=>x!==S.dropped):S.premiere;
+  let h=`<h2>${S.dropped?"Terminale":"Première"} : ${list.map(k=>SPECS[k].i+" "+SPECS[k].n).join(" + ")}</h2>`+domainCards(scoreCombo(list));
+  const tips=comboTips(list,S.dropped);
+  if(tips.length) h+=`<div class="note" style="margin-top:14px">💡 ${tips.join("<br>💡 ")}</div>`;
+  box.innerHTML=h;
+}
+function loadCombo(arr,drop){
+  S.premiere=arr.filter(isAv).slice(0,3); S.dropped=(drop&&S.premiere.includes(drop))?drop:null;
+  saveCombo(); show("explore"); renderPicker();
+}
+
+/* ================= FICHES SPÉCIALITÉS ================= */
+function renderSpecList(){
+  $("#specList").innerHTML=avail().map(k=>{const s=SPECS[k];
+    return `<button class="card click" data-act="openSpec" data-k="${k}"><div style="font-size:1.6rem">${s.i}</div><h3>${s.n}</h3><p style="color:var(--muted);margin:.2em 0">${s.sh}</p></button>`}).join("");
+  const others=SPEC_KEYS.filter(k=>!isAv(k));
+  $("#specOthers").innerHTML = others.length? `<h2>Non proposées dans cet établissement</h2><div class="chips">${others.map(k=>`<button class="chip click" data-act="openSpec" data-k="${k}">${SPECS[k].i} ${SPECS[k].n}</button>`).join("")}</div>`:"";
+}
+function openSpec(k){
+  const s=SPECS[k];
+  const doms=DOM_KEYS.filter(d=>(DOMAINS[d].w[k]||0)>=2).map(d=>DOMAINS[d].i+" "+DOMAINS[d].n);
+  $("#modalBody").innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="margin:0">${s.i} ${s.n}</h2><button class="btn ghost small" data-act="close" aria-label="Fermer">✕</button></div>
+   ${!isAv(k)?`<div class="note">Non proposée dans l'établissement sélectionné.</div>`:""}
+   <p>${s.d}</p><p><span class="badge">4 h en Première</span> <span class="badge">6 h en Terminale</span></p>
+   <h3>Grands thèmes</h3><div class="chips">${s.t.map(x=>`<span class="chip">${x}</span>`).join("")}</div>
+   <h3 style="margin-top:12px">Pour qui ?</h3><p>${s.q}</p>
+   <h3>Débouchés</h3><p>${s.o}</p>
+   ${doms.length?`<h3>Domaines où elle compte le plus</h3><div class="chips">${doms.map(x=>`<span class="chip">${x}</span>`).join("")}</div>`:""}`;
+  $("#modal").classList.add("show");
+}
+function closeModal(){$("#modal").classList.remove("show")}
+
+/* ================= MON PROJET ================= */
+function initProjet(){
+  const sel=$("#projSel"), groups={};
+  PROJETS.forEach((p,i)=>{(groups[p.d]=groups[p.d]||[]).push(`<option value="${i}">${p.n}</option>`)});
+  sel.innerHTML=`<option value="">— Choisis une formation ou un métier —</option>`+DOM_KEYS.filter(d=>groups[d]).map(d=>`<optgroup label="${DOMAINS[d].n}">${groups[d].join("")}</optgroup>`).join("");
+  sel.value=S.projet;
+  sel.onchange=()=>{S.projet=sel.value;store.set("projet",S.projet);renderProjet()};
+}
+function projScore(P,set){
+  let s=0, miss=0;
+  P.c.forEach(g=>{ if(g.split("|").some(k=>set.includes(k))) s+=10; else miss++; });
+  P.u.forEach(k=>{ if(set.includes(k)) s+=2; });
+  const w=DOMAINS[P.d].w; set.forEach(k=>s+=(w[k]||0)*0.3);
+  return {s,miss};
+}
+function combos(arr,n){const r=[];const f=(st,c)=>{if(c.length===n){r.push(c);return}for(let i=st;i<arr.length;i++)f(i+1,c.concat(arr[i]))};f(0,[]);return r}
+function bestTriples(P){
+  const A=avail();
+  return combos(A,3).map(t=>{
+    const sc=projScore(P,t).s;
+    const pairs=combos(t,2).map(p=>({p,s:projScore(P,p).s})).sort((a,b)=>b.s-a.s);
+    return {t,s:sc+pairs[0].s,keep:pairs[0].p,drop:t.find(x=>!pairs[0].p.includes(x))};
+  }).sort((a,b)=>b.s-a.s);
+}
+function renderProjet(){
+  const box=$("#projOut"); if(!box) return;
+  if(S.projet===""){box.innerHTML="";return}
+  const P=PROJETS[+S.projet];
+  const grp=g=>g.split("|").map(k=>`<span class="chip key"${isAv(k)?"":' style="opacity:.5"'}>${SPECS[k].i} ${SPECS[k].n}${isAv(k)?"":" (non proposée)"}</span>`).join(' <span style="color:var(--muted)">ou</span> ');
+  const unavailC=P.c.filter(g=>!g.split("|").some(isAv));
+  const res=bestTriples(P), seen=new Set(), top=[];
+  for(const r of res){const key=r.keep.slice().sort().join();if(seen.has(key))continue;seen.add(key);top.push(r);if(top.length===3)break}
+  let h=`<div class="card"><h2 style="margin-top:0">${DOMAINS[P.d].i} ${P.n}</h2>
+    <h3>Spécialités conseillées</h3><div class="chips">${P.c.map(grp).join("")}</div>
+    ${P.u.length?`<h3 style="margin-top:10px">Également utiles</h3><div class="chips">${P.u.filter(k=>!P.c.some(g=>g.split("|").includes(k))).map(k=>`<span class="chip"${isAv(k)?"":" style=\"opacity:.5\""}>${SPECS[k].i} ${SPECS[k].n}</span>`).join("")}</div>`:""}
+    ${P.note?`<div class="note">💡 ${P.note}</div>`:""}
+    ${unavailC.length?`<div class="note">⚠️ Une spécialité conseillée n'est pas proposée dans l'établissement sélectionné. Ce projet reste possible, mais parles-en avec ton professeur principal.</div>`:""}
+  </div><h2>Combinaisons les plus cohérentes</h2><div class="grid g3">`;
+  top.forEach((r,i)=>{
+    h+=`<div class="card"><span class="badge">n°${i+1}</span>
+      <p style="margin:.5em 0 .2em"><strong>Première :</strong> ${r.t.map(k=>SPECS[k].i+" "+SPECS[k].n).join(", ")}</p>
+      <p style="margin:.2em 0 .6em"><strong>Terminale :</strong> ${r.keep.map(k=>SPECS[k].n).join(" + ")}</p>
+      <button class="btn small" data-combo="${r.t.join(",")}" data-drop="${r.drop}">Voir dans l'explorateur →</button></div>`;
+  });
+  box.innerHTML=h+`</div><p class="lyc-banner" style="margin-top:12px">La spécialité suggérée en 3e position pour la Première est souvent interchangeable : choisis-la selon tes goûts.</p>`;
+}
+
+/* ================= COMPARER ================= */
+function initCompareSelects(){
+  const A=avail(), opts=A.map(k=>`<option value="${k}">${SPECS[k].n}</option>`).join("");
+  const ids=["ca1","ca2","cb1","cb2"], saved=store.get("cmp")||[];
+  ids.forEach((id,i)=>{const s=$("#"+id); s.innerHTML=opts; s.value = saved[i]&&A.includes(saved[i])?saved[i]:A[i%A.length]; s.onchange=renderCompare;});
+}
+function renderCompare(){
+  const v=["ca1","ca2","cb1","cb2"].map(id=>$("#"+id).value); store.set("cmp",v);
+  const box=$("#cmpOut");
+  if(v[0]===v[1]||v[2]===v[3]){box.innerHTML=`<p>Choisis deux spécialités différentes dans chaque combinaison.</p>`;return}
+  const a=Object.fromEntries(scoreCombo([v[0],v[1]]).map(x=>[x.dk,x.pct])), b=Object.fromEntries(scoreCombo([v[2],v[3]]).map(x=>[x.dk,x.pct]));
+  const order=DOM_KEYS.slice().sort((x,y)=>Math.max(b[y],a[y])-Math.max(b[x],a[x]));
+  let h=`<div class="cmp"><div class="h">Domaine</div><div class="h">A · ${SPECS[v[0]].n.split(" (")[0]} + ${SPECS[v[1]].n.split(" (")[0]}</div><div class="h">B · ${SPECS[v[2]].n.split(" (")[0]} + ${SPECS[v[3]].n.split(" (")[0]}</div>`;
+  order.forEach(dk=>{
+    h+=`<div>${DOMAINS[dk].i} ${DOMAINS[dk].n}</div>
+      <div><div class="meter"><i style="width:${Math.max(a[dk],3)}%"></i></div><small>${level(a[dk])[1]}</small></div>
+      <div><div class="meter b"><i style="width:${Math.max(b[dk],3)}%"></i></div><small>${level(b[dk])[1]}</small></div>`;
+  });
+  h+=`</div>`;
+  const plusA=order.filter(d=>a[d]-b[d]>=25).map(d=>DOMAINS[d].n), plusB=order.filter(d=>b[d]-a[d]>=25).map(d=>DOMAINS[d].n);
+  h+=`<div class="note">${plusA.length?`<strong>A</strong> ouvre davantage vers : ${plusA.join(", ")}.<br>`:""}${plusB.length?`<strong>B</strong> ouvre davantage vers : ${plusB.join(", ")}.`:""}${!plusA.length&&!plusB.length?"Les deux combinaisons ouvrent vers des domaines assez proches.":""}</div>`;
+  box.innerHTML=h;
+}
+
+/* ================= TESTS ================= */
+let run=null;
+function startTest(id){
+  run={id,i:0,ans:[],score:0,shown:false,done:false};
+  $("#testMenu").style.display="none"; $("#testRun").style.display="block";
+  renderQ();
+}
+function renderQ(){
+  const box=$("#testRun"), N = run.id==="spe"?T1.length:run.id==="riasec"?T2.length:QUIZ.length;
+  if(run.i>=N){ finishTest(); return }
+  const pct=Math.round(run.i/N*100);
+  let h=`<div class="row noprint"><button class="btn ghost small" data-s="tests">← Quitter</button>
+    <span style="color:var(--muted)">Question ${run.i+1} / ${N}</span></div>
+    <div class="progress"><i style="width:${pct}%"></i></div><div class="card" style="max-width:760px">`;
+  if(run.id==="spe"){
+    const Q=T1[run.i];
+    h+=`<div class="q">${Q.q}</div>`+Q.o.map((o,j)=>`<button class="opt${run.ans[run.i]===j?" on":""}" data-act="answer" data-v="${j}">${o[0]}</button>`).join("");
+  } else if(run.id==="riasec"){
+    h+=`<div style="color:var(--muted)">Est-ce que ça te plairait de…</div><div class="q">${T2[run.i][0]}</div><div class="likert">`+
+      LIKERT.map(([l,v])=>`<button class="opt${run.ans[run.i]===v?" on":""}" data-act="answer" data-v="${v}">${l}</button>`).join("")+`</div>`;
+  } else {
+    const Q=QUIZ[run.i];
+    h+=`<div style="color:var(--muted)">Vrai ou faux ?</div><div class="q">${Q.s}</div>`;
+    if(!run.shown){
+      h+=`<div class="likert" style="grid-template-columns:1fr 1fr"><button class="opt" data-act="quizAns" data-v="1">✅ Vrai</button><button class="opt" data-act="quizAns" data-v="0">❌ Faux</button></div>`;
+    } else {
+      const ok=run.ans[run.i]===Q.a;
+      h+=`<div class="note" style="border-left:4px solid ${ok?"var(--ok)":"var(--bad)"}"><strong>${ok?"Bien vu !":"Eh non !"}</strong> C'est <strong>${Q.a?"vrai":"faux"}</strong>. ${Q.e}</div>
+        <div style="margin-top:12px"><button class="btn" data-act="quizNext">${run.i+1<N?"Question suivante →":"Voir mon score"}</button></div>`;
+    }
+  }
+  h+=`</div>`;
+  if(run.i>0 && run.id!=="quiz") h+=`<button class="btn ghost small" style="margin-top:12px" data-act="prevQ">← Question précédente</button>`;
+  box.innerHTML=h;
+}
+function answer(v){ run.ans[run.i]=v; run.i++; setTimeout(renderQ,120); }
+function quizAnswer(v){ run.ans[run.i]=v; if(v===QUIZ[run.i].a) run.score++; run.shown=true; renderQ(); }
+
+function computeT1(ans){
+  const sc={}, mx={}; SPEC_KEYS.forEach(k=>{sc[k]=0;mx[k]=0});
+  T1.forEach((Q,i)=>{
+    const m={}; Q.o.forEach(o=>Object.entries(o[1]).forEach(([k,v])=>m[k]=Math.max(m[k]||0,v)));
+    Object.entries(m).forEach(([k,v])=>mx[k]+=v);
+    Object.entries(Q.o[ans[i]][1]).forEach(([k,v])=>sc[k]+=v);
+  });
+  return SPEC_KEYS.map(k=>({k,p:mx[k]?Math.round(sc[k]/mx[k]*100):0})).sort((a,b)=>b.p-a.p);
+}
+function finishTest(){
+  run.done=true;
+  if(run.id==="spe"){ S.t1={rank:computeT1(run.ans),date:Date.now()}; store.set("t1",S.t1); }
+  else if(run.id==="riasec"){
+    const sc={}; Object.keys(RIA).forEach(k=>sc[k]=0);
+    T2.forEach((s,i)=>sc[s[1]]+=run.ans[i]);
+    S.t2={rank:Object.keys(RIA).map(k=>({k,p:Math.round(sc[k]/15*100)})).sort((a,b)=>b.p-a.p),date:Date.now()}; store.set("t2",S.t2);
+  } else { S.quiz={score:run.score,n:QUIZ.length,date:Date.now()}; store.set("quiz",S.quiz); }
+  showResult(run.id);
+}
+function showResult(id){
+  const body = id==="spe"?resT1(S.t1):id==="riasec"?resT2(S.t2):resQuiz(S.quiz);
+  $("#testRun").innerHTML=`<div class="row noprint"><button class="btn ghost small" data-s="tests">← Autres tests</button>
+     <button class="btn ghost small" data-test="${id}">↺ Refaire</button>
+     <button class="btn ghost small" data-act="print" data-sec="tests">🖨 Imprimer</button>
+     <button class="btn ghost small" data-s="fiche">📝 Ma fiche</button></div>`+body;
+}
+function resT1(r){
+  if(!r) return "";
+  const rank=r.rank.filter(x=>isAv(x.k)), top=rank.slice(0,3).map(x=>x.k);
+  const out=r.rank.filter(x=>!isAv(x.k)&&x.p>=50&&x.p>=(rank[2]?rank[2].p:0));
+  const bars=rank.map(({k,p})=>`<div class="res-row"><div class="lbl">${SPECS[k].i} ${SPECS[k].n}</div><div class="meter"><i style="width:${Math.max(p,3)}%"></i></div><div class="val">${p}%</div></div>`).join("");
+  return `<h2>Les spécialités qui te ressemblent</h2>
+   <div class="grid g3">${top.map((k,i)=>`<div class="card"><span class="badge">n°${i+1}</span><div style="font-size:1.8rem;margin-top:6px">${SPECS[k].i}</div><h3>${SPECS[k].n}</h3><p style="color:var(--muted)">${SPECS[k].q}</p></div>`).join("")}</div>
+   <div class="row noprint" style="margin:14px 0"><button class="btn" data-combo="${top.join(",")}">Explorer cette combinaison →</button></div>
+   ${out.length?`<div class="note">Tes réponses pointent aussi vers ${out.map(x=>SPECS[x.k].n).join(", ")}, qui n'${out.length>1?"existent":"existe"} pas dans l'établissement sélectionné. Des options ou des activités peuvent compléter ce goût.</div>`:""}
+   <div class="card" style="margin-top:12px"><h3>Ton profil complet</h3>${bars}</div>
+   <div class="note">Ce résultat reflète tes goûts, pas tes résultats scolaires. Compare-le avec tes notes et tes projets avant de décider.</div>`;
+}
+function riaSpecs(r){ const t=r.rank.slice(0,2).map(x=>x.k); return [...new Set(t.flatMap(k=>RIA[k].s))].filter(isAv); }
+function resT2(r){
+  if(!r) return "";
+  const t=r.rank.slice(0,2).map(x=>x.k), code=r.rank.slice(0,3).map(x=>x.k).join("");
+  const specs=riaSpecs(r).slice(0,5), doms=[...new Set(t.flatMap(k=>RIA[k].dm))];
+  const bars=r.rank.map(({k,p})=>`<div class="res-row"><div class="lbl"><strong>${k}</strong> · ${RIA[k].n}</div><div class="meter"><i style="width:${Math.max(p,3)}%"></i></div><div class="val">${p}%</div></div>`).join("");
+  return `<h2>Ton profil d'intérêts : <span style="color:var(--accent-2)">${code}</span></h2>
+   <div class="grid g3">${t.map(k=>`<div class="card"><h3>${k} · ${RIA[k].n}</h3><p>${RIA[k].d}</p></div>`).join("")}</div>
+   <div class="card" style="margin-top:14px">${bars}</div>
+   <h3 style="margin-top:16px">Spécialités en lien</h3><div class="chips">${specs.map(k=>`<span class="chip">${SPECS[k].i} ${SPECS[k].n}</span>`).join("")}</div>
+   <h3 style="margin-top:12px">Domaines d'études à explorer</h3><div class="chips">${doms.map(d=>`<span class="chip">${DOMAINS[d].i} ${DOMAINS[d].n}</span>`).join("")}</div>
+   ${specs.length>=3?`<div class="row noprint" style="margin:14px 0"><button class="btn" data-combo="${specs.slice(0,3).join(",")}">Explorer une combinaison possible →</button></div>`:""}
+   <div class="note">Le modèle RIASEC (John Holland) décrit des tendances d'intérêts. La plupart des personnes combinent plusieurs types : regarde surtout tes deux ou trois premières lettres.</div>`;
+}
+function resQuiz(q){
+  if(!q) return "";
+  const msg = q.score>=10?"Excellent, tu connais bien le système !":q.score>=7?"Pas mal ! Quelques idées reçues à corriger.":"Les idées reçues ont la vie dure : relis les explications et parles-en en classe.";
+  return `<h2>Ton score : ${q.score} / ${q.n}</h2><p class="lead">${msg}</p>
+   <div class="card"><h3>Les réponses</h3><ul>${QUIZ.map(Q=>`<li><strong>${Q.a?"Vrai":"Faux"}</strong> : ${Q.s}</li>`).join("")}</ul></div>`;
+}
+
+/* ================= REPÈRES ================= */
+function renderReperes(){
+  $("#timeline").innerHTML=TIMELINE.map(y=>`<div class="card"><h3>${y.i} ${y.t}</h3><div class="tl" style="margin-top:12px">${y.items.map(([w,d])=>`<div class="it"><strong>${w}</strong><br>${d}</div>`).join("")}</div></div>`).join("");
+  $("#etudes").innerHTML=ETUDES.map(e=>`<div class="card"><h3>${e.t}</h3><ul class="tight">${e.p.map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("")+
+    `<div class="card" style="grid-column:1/-1"><div class="note" style="margin:0">Le psychologue de l'Éducation nationale et le service d'orientation du lycée peuvent t'aider à construire un projet dans plusieurs pays à la fois : c'est souvent la meilleure stratégie.</div></div>`;
+}
+
+/* ================= MA FICHE ================= */
+function ficheSummary(){
+  const P=S.premiere, d=S.dropped;
+  const comb = P.length===3 ? `Première : ${P.map(k=>SPECS[k].n).join(", ")}${d?`<br>Terminale : ${P.filter(x=>x!==d).map(k=>SPECS[k].n).join(", ")}`:"<br><em>Spécialité abandonnée en Terminale : non choisie</em>"}` : "<em>Pas encore de combinaison choisie dans l'explorateur.</em>";
+  const t1 = S.t1 ? S.t1.rank.filter(x=>isAv(x.k)).slice(0,3).map(x=>SPECS[x.k].n).join(", ") : "<em>non réalisé</em>";
+  const t2 = S.t2 ? `${S.t2.rank.slice(0,3).map(x=>x.k).join("")} (${S.t2.rank.slice(0,2).map(x=>RIA[x.k].n).join(", ")})` : "<em>non réalisé</em>";
+  const pj = S.projet!=="" ? PROJETS[+S.projet].n : "<em>aucun</em>";
+  const qz = S.quiz ? `${S.quiz.score} / ${S.quiz.n}` : "<em>non réalisé</em>";
+  let doms="";
+  if(P.length===3){ const list=d?P.filter(x=>x!==d):P; doms=scoreCombo(list).slice(0,4).map(x=>DOMAINS[x.dk].n).join(", "); }
+  return `<p><strong>Ma combinaison</strong><br>${comb}</p>${doms?`<p><strong>Domaines les plus ouverts</strong><br>${doms}</p>`:""}
+    <p><strong>Test « spécialités »</strong><br>${t1}</p><p><strong>Profil d'intérêts</strong><br>${t2}</p>
+    <p><strong>Projet exploré</strong><br>${pj}</p><p><strong>Quiz idées reçues</strong><br>${qz}</p>`;
+}
+function renderFiche(){
+  const box=$("#ficheAuto"); if(!box) return;
+  box.innerHTML=`<h3>Mon parcours dans Cap Spécialités</h3><p class="lyc-banner">🏫 ${LYCEES[S.lycee].n}</p>`+ficheSummary();
+  document.querySelectorAll("[data-f]").forEach(el=>{ el.value=S.fiche[el.dataset.f]||""; });
+}
+document.addEventListener("input",e=>{
+  const f=e.target.dataset && e.target.dataset.f; if(!f) return;
+  S.fiche[f]=e.target.value; store.set("fiche",S.fiche);
+});
+function renderFichePrint(){
+  const F=S.fiche, blk=(t,v)=>`<h3 style="margin-top:14px">${t}</h3><div style="white-space:pre-wrap;border:1px solid #999;border-radius:6px;min-height:60px;padding:8px">${esc(v||"")}</div>`;
+  $("#ficheprint").innerHTML=`<h2 style="margin-top:0">${esc(F.prenom||"Élève")} · ${esc(F.classe||"")}</h2>
+    <p>Établissement : ${LYCEES[S.lycee].n} · Édité le ${new Date().toLocaleDateString("fr-FR")}</p>
+    <div class="card">${ficheSummary()}</div>
+    ${blk("Mes points forts",F.forts)}${blk("Ce qui m'intéresse",F.interets)}${blk("Projets envisagés",F.projets)}${blk("Mes questions",F.questions)}
+    <h3 style="margin-top:14px">Avis et conseils du professeur principal</h3><div style="border:1px solid #999;border-radius:6px;min-height:110px"></div>`;
+}
+function b64e(s){return btoa(unescape(encodeURIComponent(s)))}
+function b64d(s){return decodeURIComponent(escape(atob(s)))}
+function exportCode(){
+  const o={p:S.fiche.prenom||"",c:S.fiche.classe||"",l:S.lycee,pr:S.premiere,d:S.dropped,
+    t1:S.t1?S.t1.rank.filter(x=>isAv(x.k)).slice(0,3).map(x=>x.k):[],t2:S.t2?S.t2.rank.slice(0,3).map(x=>x.k).join(""):"",
+    pj:S.projet!==""?+S.projet:null,qz:S.quiz?S.quiz.score:null};
+  const code="CAP2:"+b64e(JSON.stringify(o));
+  $("#codeBox").innerHTML=`<div class="card" style="margin-top:14px"><h3>Mon code</h3>
+    ${!o.p?`<div class="note">⚠️ Pense à indiquer ton prénom et ton nom dans la fiche avant d'envoyer ton code.</div>`:""}
+    <textarea id="codeTxt" readonly style="min-height:70px;font-family:monospace;font-size:.85rem">${code}</textarea>
+    <div class="row" style="margin-top:8px"><button class="btn small" data-act="copyCode">📋 Copier</button><span id="copyMsg" style="color:var(--muted)"></span></div>
+    <p class="lyc-banner">Envoie ce code à ton enseignant (messagerie de l'ENT, document partagé…).</p></div>`;
+}
+function copyCode(){
+  const t=$("#codeTxt"); t.select();
+  const done=()=>$("#copyMsg").textContent="Copié !";
+  try{ if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t.value).then(done,()=>{document.execCommand("copy");done()})} else {document.execCommand("copy");done()} }
+  catch(e){ $("#copyMsg").textContent="Sélectionne le texte et copie-le (Ctrl+C)." }
+}
+function clearAll(){
+  if(!confirm("Effacer ta fiche, tes résultats de tests et ta combinaison ?")) return;
+  S.t1=S.t2=S.quiz=null; S.fiche={}; S.projet=""; S.premiere=[]; S.dropped=null;
+  ["t1","t2","quiz","fiche","projet","combo"].forEach(k=>store.set(k,null));
+  $("#projSel").value=""; $("#codeBox").innerHTML="";
+  renderPicker(); renderProjet(); renderFiche();
+}
+
+/* ================= ENSEIGNANT ================= */
+function analyzeCodes(){
+  const lines=$("#codesIn").value.split(/\s+/).filter(x=>x.startsWith("CAP2:"));
+  const rows=[], bad=[];
+  lines.forEach((l,i)=>{ try{ rows.push(JSON.parse(b64d(l.slice(5)))) }catch(e){ bad.push(i+1) } });
+  S.profRows=rows;
+  const box=$("#profOut");
+  if(!rows.length){box.innerHTML=`<div class="note">Aucun code valide trouvé. Les codes commencent par « CAP2: ».</div>`;return}
+  const nm=k=>SPECS[k]?SPECS[k].n:k;
+  const cnt=(arr)=>{const m={};arr.forEach(x=>{if(x)m[x]=(m[x]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+  const pr=cnt(rows.flatMap(r=>r.pr||[]));
+  const tle=cnt(rows.filter(r=>r.pr&&r.pr.length===3&&r.d).map(r=>r.pr.filter(x=>x!==r.d).map(nm).sort().join(" + ")));
+  const ria=cnt(rows.map(r=>r.t2?r.t2[0]:null));
+  const bar=(lab,n,max)=>`<div class="res-row"><div class="lbl">${lab}</div><div class="meter"><i style="width:${n/max*100}%"></i></div><div class="val">${n}</div></div>`;
+  let h=`<h2>${rows.length} élève${rows.length>1?"s":""}</h2>${bad.length?`<div class="note">${bad.length} code(s) illisible(s) ignoré(s).</div>`:""}
+   <div class="grid g2"><div class="card"><h3>Spécialités choisies en Première</h3>${pr.map(([k,n])=>bar(nm(k),n,rows.length)).join("")||"<p>—</p>"}</div>
+   <div class="card"><h3>Combinaisons de Terminale</h3>${tle.map(([k,n])=>bar(k,n,rows.length)).join("")||"<p>Aucune combinaison de Terminale renseignée.</p>"}
+   <h3 style="margin-top:14px">Type RIASEC dominant</h3>${ria.map(([k,n])=>bar(k+" · "+RIA[k].n,n,rows.length)).join("")||"<p>—</p>"}</div></div>
+   <div class="card tablewrap" style="margin-top:14px"><table><thead><tr><th>Élève</th><th>Classe</th><th>Première</th><th>Terminale</th><th>Test spécialités</th><th>RIASEC</th><th>Projet</th><th>Quiz</th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    h+=`<tr><td>${esc(r.p)||"—"}</td><td>${esc(r.c)}</td><td>${(r.pr||[]).map(nm).join(", ")}</td><td>${r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"—"}</td><td>${(r.t1||[]).map(nm).join(", ")||"—"}</td><td>${esc(r.t2)||"—"}</td><td>${r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"—"}</td><td>${r.qz!=null?r.qz+"/"+QUIZ.length:"—"}</td></tr>`;
+  });
+  box.innerHTML=h+`</tbody></table></div>`;
+}
+function downloadCSV(){
+  if(!S.profRows.length) analyzeCodes();
+  if(!S.profRows.length) return;
+  const nm=k=>SPECS[k]?SPECS[k].n:k, q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const lines=[["Élève","Classe","Établissement","Première","Terminale","Test spécialités","RIASEC","Projet","Quiz"].map(q).join(";")];
+  S.profRows.forEach(r=>lines.push([r.p,r.c,LYCEES[r.l]?LYCEES[r.l].n:r.l,(r.pr||[]).map(nm).join(", "),r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"",(r.t1||[]).map(nm).join(", "),r.t2,r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"",r.qz!=null?r.qz+"/"+QUIZ.length:""].map(q).join(";")));
+  const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="cap-specialites-classe.csv"; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ================= INIT ================= */
+initLycee(); initProjet(); renderReperes(); applyLycee();
+</script>
+</body>
+</html>
