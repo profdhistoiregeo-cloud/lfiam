@@ -1,0 +1,520 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><script type="text/javascript" nonce="07780c6ce4394a76976a9df88ae" src="//local.adguard.org?ts=1795018032357&amp;type=content-script&amp;dmn=99de084b-1b92-4902-8893-b1029459a0f5.frame.claudeusercontent.com&amp;url=https%3A%2F%2F99de084b-1b92-4902-8893-b1029459a0f5.frame.claudeusercontent.com%2F_f%2F1793820655-ff70%2F_src%2Findex.html%3F__frame_t%3DvKRM12m9vly6-Ezru_rIwfMH.56d0c62a-5f33-41ac-9944-c8000b44ed98.3470da86-122f-4e67-902a-2b219e54c65c.1795024351&amp;app=brave.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-loc&amp;st-dnt"></script><script type="text/javascript" nonce="07780c6ce4394a76976a9df88ae" src="//local.adguard.org?ts=1795018032357&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head><body>
+<title>Né quelque part</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one column, a "birth certificate" card that fills step by step; class mode = grid of small certificates */
+:root {
+  --bg: #ECEFF3; --paper: #FFFFFF; --ink: #15233B; --muted: #5B6676; --line: #D3D9E1;
+  --accent: #1F5FBF; --accent-ink: #FFFFFF;
+  --alive: #B9C3CF; --dead: #D1495B; --good: #2F7D59;
+  --afr: #C46A1E; --asi: #1F7FA8; --ame: #7A4FA0; --eur: #2F7D59;
+  --land: #D8DEE6; --sea: #F6F8FA;
+  --display: 'Bricolage Grotesque', 'Arial Narrow', Arial, sans-serif;
+  --body: 'Atkinson Hyperlegible', Verdana, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F1724; --paper: #172234; --ink: #E8EDF4; --muted: #9AA7B8; --line: #2A3850;
+  --accent: #6FA3F0; --accent-ink: #0F1724; --alive: #3A4A61; --dead: #F07A8A; --good: #6CC49A;
+  --afr: #F0A35E; --asi: #5DBDE6; --ame: #B796D8; --eur: #6CC49A; --land: #2A3850; --sea: #142033; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F1724; --paper: #172234; --ink: #E8EDF4; --muted: #9AA7B8; --line: #2A3850;
+  --accent: #6FA3F0; --accent-ink: #0F1724; --alive: #3A4A61; --dead: #F07A8A; --good: #6CC49A;
+  --afr: #F0A35E; --asi: #5DBDE6; --ame: #B796D8; --eur: #6CC49A; --land: #2A3850; --sea: #142033; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px }
+.wrap { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; line-height: 1.08 }
+h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; letter-spacing: -0.02em }
+h2 { font-size: clamp(1.5rem, 3.4vw, 2.1rem); font-weight: 700 }
+h3 { font-size: 1.15rem; font-weight: 700 }
+p { margin: 0 }
+.lede { font-size: 1.15rem; color: var(--muted); max-width: 62ch }
+.kicker { font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted) }
+header { display: flex; flex-direction: column; gap: 10px }
+.modes { display: flex; flex-wrap: wrap; gap: 10px }
+button { font: inherit; cursor: pointer; border-radius: 999px; padding: 12px 22px; border: 2px solid var(--ink); background: transparent; color: var(--ink); font-weight: 700 }
+button.primary { background: var(--ink); color: var(--bg) }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px }
+button[disabled] { opacity: .4; cursor: default }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+.map { width: 100%; height: auto; display: block; border-radius: 12px; background: var(--sea) }
+.map path { fill: var(--land) }
+.map .pin { fill: var(--accent); stroke: var(--paper); stroke-width: 2 }
+.map .pin.other { fill: var(--muted); opacity: .35; stroke: none }
+.map .halo { fill: none; stroke: var(--accent); stroke-width: 2.5 }
+@media (prefers-reduced-motion: no-preference) { .map .halo { animation: halo 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center } }
+@keyframes halo { from { transform: scale(.4); opacity: 1 } to { transform: scale(2.4); opacity: 0 } }
+.steps { display: flex; flex-direction: column; gap: 14px }
+.step { display: grid; grid-template-columns: 74px 1fr; gap: 16px; align-items: start }
+.age { font-family: var(--display); font-weight: 800; font-size: 1.05rem; text-align: right; padding-top: 22px; color: var(--muted); font-variant-numeric: tabular-nums }
+.big { font-family: var(--display); font-weight: 800; font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.05 }
+.cont { display: inline-block; font-size: .8rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; color: var(--paper); letter-spacing: .04em }
+.c-Afrique { background: var(--afr) } .c-Asie { background: var(--asi) } .c-Amériques { background: var(--ame) } .c-Europe { background: var(--eur) }
+.dots { display: grid; grid-template-columns: repeat(50, 1fr); gap: 2px; max-width: 560px }
+.dots i { aspect-ratio: 1; border-radius: 50%; background: var(--alive); display: block }
+.dots i.d { background: var(--dead) }
+.dots i.me { outline: 3px solid var(--ink); outline-offset: 1px; transform: scale(1.6); position: relative; z-index: 1 }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .9rem; color: var(--muted) }
+.legend b::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: 0 }
+.legend .l-a::before { background: var(--alive) } .legend .l-d::before { background: var(--dead) }
+.verdict { font-weight: 700; font-size: 1.1rem }
+.verdict.ok { color: var(--good) } .verdict.ko { color: var(--dead) }
+.bars { display: flex; flex-direction: column; gap: 8px }
+.bar { display: grid; grid-template-columns: 175px 1fr 80px; gap: 10px; align-items: center; font-size: .95rem }
+.bar .track { height: 14px; background: var(--bg); border-radius: 7px; overflow: hidden }
+.bar .fill { height: 100%; border-radius: 7px; background: var(--muted) }
+.bar.me .fill { background: var(--accent) }
+.bar .v { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right }
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px }
+.tile { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+.tile .n { font-family: var(--display); font-weight: 800; font-size: 1.55rem; line-height: 1; font-variant-numeric: tabular-nums }
+.tile .t { font-size: .9rem; color: var(--muted) }
+.stack { display: flex; height: 30px; border-radius: 8px; overflow: hidden }
+.stack div { display: flex; align-items: center; justify-content: center; color: var(--paper); font-weight: 700; font-size: .85rem; min-width: 0 }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 12px 18px; display: flex; flex-direction: column; gap: 3px; position: relative; overflow: hidden; font-size: .95rem }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c) }
+.card .who { display: flex; justify-content: space-between; color: var(--muted); font-size: .85rem; font-weight: 700 }
+.card .where { font-family: var(--display); font-weight: 700; font-size: 1.15rem }
+.card.dead .life { color: var(--dead); font-weight: 700 }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center }
+label { font-weight: 700 }
+input[type=number] { font: inherit; width: 90px; padding: 9px 12px; border-radius: 10px; border: 2px solid var(--line); background: var(--paper); color: var(--ink) }
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px }
+summary { font-weight: 700; cursor: pointer }
+details ul { padding-left: 20px; margin: 10px 0 0; color: var(--muted); font-size: .95rem; display: flex; flex-direction: column; gap: 6px }
+.qs { display: flex; flex-direction: column; gap: 8px; padding-left: 20px; margin: 0 }
+.fade { animation: none }
+@media (prefers-reduced-motion: no-preference) { .fade { animation: up .45s ease-out } }
+@keyframes up { from { opacity: .2; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@media (max-width: 560px) { .step { grid-template-columns: 1fr; gap: 4px } .age { text-align: left; padding-top: 0 } .bar { grid-template-columns: 96px 1fr 76px } .dots { gap: 1px } }
+.maroc { border-top: 1px dashed var(--line); padding-top: 10px; font-size: .95rem; color: var(--muted) }
+.maroc b { color: var(--ink) }
+.note { font-size: .9rem; color: var(--muted) }
+.cmp { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 14px; align-items: end; border-top: 1px dashed var(--line); padding-top: 10px }
+.cmp.one { grid-template-columns: 1fr auto }
+.cmp div { display: flex; flex-direction: column; align-items: flex-end; min-width: 88px }
+.cmp b { font-family: var(--display); font-size: 1.35rem; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--accent) }
+.cmp .ma b { color: var(--afr) }
+.cmp span { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.cmp .cl { text-transform: none; letter-spacing: 0; font-size: .92rem; align-self: center }
+.card .fam { color: var(--muted); font-size: .88rem }
+@media (max-width: 560px) { .cmp { grid-template-columns: 1fr 1fr } .cmp .cl { grid-column: 1 / -1 } .cmp div { align-items: flex-start } }
+.you { font-size: .95rem; color: var(--muted); border-left: 3px solid var(--accent); padding-left: 10px }
+.you b { color: var(--ink) }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="kicker">Géographie · 5e · Richesse et pauvreté dans le monde</p>
+    <h1>Né quelque part</h1>
+    <p class="lede">Chaque année, environ 132 millions de bébés naissent sur la Terre. Personne ne choisit son pays. Le hasard va décider pour toi : ta vie dépendra des chiffres réels du pays où tu nais.</p>
+    <div class="modes">
+      <button class="primary" id="btn-life">Vivre une vie</button>
+      <button id="btn-class">Faire naître toute la classe</button>
+    </div>
+  </header>
+
+  <section id="life" class="panel" hidden></section>
+  <section id="class" class="panel" hidden></section>
+
+  <section id="start" class="panel">
+    <h2>Comment ça marche ?</h2>
+    <p>Tu nais dans l’un des 24 pays de ce monde réduit. Plus un pays compte de naissances, plus tu as de chances d’y naître : 1 bébé sur 6 naît en Inde, 1 sur 200 au Maroc. Ensuite, à chaque âge, ta vie est tirée au sort avec les chiffres de ton pays : ville ou campagne, famille pauvre ou riche, vaccins, santé, école, mariage, migrations. Une seule fois, c’est toi qui choisis. À chaque étape, compare avec le Maroc.</p>
+    <svg class="map" viewBox="0 0 1000 440" role="img" aria-label="Carte des 24 pays du jeu">
+      <g transform="translate(0,-30)"><path d="M275 256L278 248L281 246L282 243L286 239L283 227L279 225L276 228L278 229L275 230L275 228L268 227L264 222L264 223L262 222L262 219L256 214L257 213L247 211L237 205L232 207L212 199L207 195L208 190L205 187L188 170L186 163L181 162L181 166L196 186L194 187L188 181L188 178L180 173L183 171L179 168L174 158L171 155L165 154L154 138L154 131L156 124L154 116L158 117L159 119L159 114L151 110L146 109L145 105L141 103L141 101L133 96L128 89L120 88L111 85L91 81L88 81L89 83L79 86L79 81L82 80L82 80L72 85L74 86L72 88L60 94L42 99L62 90L64 86L58 88L55 86L50 87L50 84L49 83L45 84L41 82L39 79L40 78L43 75L53 73L51 71L53 70L42 71L33 68L43 65L45 65L45 66L51 66L37 60L38 59L47 57L50 55L65 52L71 54L101 55L121 59L139 55L141 56L144 54L151 57L154 55L155 57L163 56L184 60L180 61L195 61L198 63L201 61L198 60L200 59L205 59L218 62L227 62L226 60L229 60L233 60L233 63L235 61L237 61L238 58L232 55L232 52L236 50L239 51L246 55L243 56L248 57L248 60L252 58L256 59L255 61L257 63L262 59L262 56L274 58L272 61L274 62L274 64L268 66L262 65L257 70L248 73L248 75L245 75L238 81L237 86L241 87L244 91L248 91L264 96L271 97L272 102L278 108L282 104L278 98L283 97L287 93L285 89L282 87L285 84L283 77L285 76L295 77L302 80L307 80L308 86L312 88L316 87L321 82L329 92L328 94L341 98L342 101L345 102L345 105L333 110L316 110L302 120L309 116L319 113L322 115L319 116L321 122L325 123L329 123L332 119L334 122L318 129L316 129L316 126L321 124L314 125L314 126L304 130L303 132L306 134L295 136L300 136L295 137L292 142L290 140L292 143L289 147L290 145L288 141L288 144L286 144L288 145L290 151L274 163L274 167L278 175L277 180L275 180L273 178L267 167L264 168L260 166L251 166L252 169L239 167L230 174L230 178L229 178L230 178L228 188L234 198L238 200L246 198L248 196L249 192L258 190L259 192L256 199L255 199L255 204L253 206L264 206L268 208L267 219L272 225L275 225L279 223L287 226L290 224L292 219L296 219L301 215L302 216L300 218L301 225L303 223L302 220L305 218L306 216L311 221L316 220L320 222L321 220L328 220L326 221L327 222L331 224L331 226L336 228L341 233L350 234L357 238L360 245L361 245L359 249L365 251L365 253L367 252L375 254L376 257L379 257L389 258L397 263L402 265L404 270L402 275L393 286L391 300L386 311L383 314L376 315L368 319L365 322L364 330L351 346L344 347L338 344L338 346L341 348L342 353L340 356L335 358L327 358L327 363L326 364L319 364L320 367L323 367L324 368L319 371L318 375L313 377L312 379L318 381L317 384L308 391L311 395L307 395L303 397L303 400L292 395L290 385L294 380L290 380L293 377L293 373L297 373L298 368L296 367L295 370L294 370L297 359L296 353L297 353L302 340L301 330L303 327L305 309L305 301L289 291L278 270L274 267L275 266L274 263L278 257L275 256ZM67 194L70 196L68 197L66 195L67 194ZM282 187L294 194L284 195L286 193L283 192L281 190L272 188L273 187L264 189L269 186L276 186L282 187ZM143 109L151 110L157 115L151 114L144 111L143 109ZM130 100L134 100L133 103L136 105L130 100ZM77 90L72 92L70 90L74 89L77 90ZM267 77L269 75L273 75L269 77L267 77ZM29 75L23 74L23 73L31 74L29 75ZM277 73L275 74L269 72L262 75L261 73L258 73L260 72L261 67L277 73ZM20 72L11 68L5 68L3 67L4 66L0 67L2 68L0 70L0 58L14 63L14 65L16 66L15 64L23 64L28 67L21 68L20 72ZM227 55L234 58L233 59L223 57L227 55ZM199 47L207 48L210 53L219 55L219 57L215 57L216 58L215 59L206 58L185 60L174 56L188 55L172 54L171 53L177 52L168 51L173 48L180 46L183 47L181 48L188 47L192 49L195 47L199 51L201 50L199 47ZM0 53L0 51L7 52L4 53L0 53ZM224 52L215 49L215 48L221 48L218 46L221 45L230 45L230 46L228 47L232 48L231 51L224 52ZM153 44L173 44L179 46L169 49L165 52L158 53L150 50L156 45L153 44ZM249 45L235 50L233 46L237 44L249 45ZM203 46L208 45L210 46L207 48L203 46ZM277 45L283 45L288 48L278 48L275 46L277 45ZM240 42L234 43L231 42L237 40L240 42ZM205 42L184 42L189 41L173 41L179 38L197 40L193 38L196 37L198 37L201 39L206 39L206 40L205 42ZM252 40L275 40L278 42L272 43L251 43L243 42L242 39L239 38L230 37L231 36L246 37L248 38L247 39L252 40ZM215 38L226 37L229 40L227 42L223 42L220 42L220 40L215 40L215 38ZM159 39L169 35L177 34L177 36L175 37L159 39ZM185 34L191 33L195 33L189 35L185 34ZM235 32L227 33L226 31L235 32ZM207 30L220 31L223 34L208 32L211 31L207 30ZM241 29L236 30L231 27L238 25L237 24L243 24L256 27L262 30L248 33L239 31L241 29ZM296 400L293 397L302 400L307 396L309 396L312 400L319 402L318 403L314 402L309 404L296 400ZM331 395L330 394L333 392L340 393L331 395ZM464 228L459 220L454 216L454 212L451 209L454 205L455 200L453 189L460 177L473 167L473 163L474 160L481 155L484 151L494 152L504 148L526 146L528 147L528 148L531 148L529 149L530 151L529 156L542 160L544 163L553 166L556 164L556 160L560 159L580 164L586 162L589 164L594 164L596 162L600 154L600 148L596 148L590 150L588 148L582 150L577 148L573 144L574 142L573 140L576 138L580 138L581 136L587 136L593 133L598 133L607 136L615 135L615 132L602 124L606 122L605 120L609 119L597 121L597 123L601 124L601 125L594 127L593 126L593 125L590 124L593 123L592 122L585 121L582 125L580 125L577 132L580 136L577 136L573 138L572 137L569 136L566 137L568 139L566 139L563 138L567 145L564 145L565 146L563 146L564 149L562 149L560 148L559 144L554 138L554 134L544 129L541 125L539 126L539 123L537 123L534 124L535 128L542 133L544 133L544 135L551 138L551 139L547 138L546 139L548 140L547 142L545 144L544 145L545 142L543 139L534 134L529 131L528 128L525 127L518 130L509 130L508 134L502 136L499 141L500 142L494 148L488 148L485 150L482 147L475 148L475 144L474 142L476 137L474 130L478 128L495 129L496 128L497 122L492 118L488 117L487 115L496 115L495 112L497 113L504 111L505 108L511 107L513 103L523 101L524 100L523 96L524 91L529 90L528 92L530 93L527 96L528 98L530 100L535 99L539 101L549 98L555 99L559 97L559 92L560 91L563 90L565 92L567 92L568 88L565 87L565 86L578 85L581 83L578 82L564 84L559 81L560 79L558 76L560 74L571 69L566 67L562 67L559 69L559 71L550 76L548 80L552 83L550 86L547 87L544 94L541 94L539 96L536 96L529 85L523 88L520 89L516 87L514 78L529 71L541 62L553 56L564 55L568 53L578 52L587 54L583 55L586 57L589 56L601 58L614 63L614 64L607 67L592 65L597 67L597 71L603 73L601 70L603 69L610 71L612 70L610 68L617 65L622 66L624 65L621 63L623 61L621 60L628 60L630 62L627 62L627 64L629 65L649 59L651 59L649 61L663 59L667 60L670 58L667 57L668 56L690 61L692 59L686 57L687 56L685 53L694 47L702 48L702 49L700 52L702 54L702 58L705 60L698 66L701 66L708 62L707 60L708 58L705 58L704 57L707 54L703 52L708 50L707 48L710 49L709 52L712 52L711 50L715 49L726 51L724 48L724 45L741 45L739 43L742 41L780 38L783 35L790 34L795 35L791 36L797 36L798 38L809 37L817 39L816 41L804 44L814 45L815 46L821 45L842 47L842 45L853 46L857 47L858 49L857 50L865 53L867 50L872 52L889 51L887 49L890 48L915 49L925 53L942 53L944 54L944 56L947 57L966 57L971 59L974 58L972 57L973 55L988 56L1000 58L1000 70L993 71L998 75L998 77L993 76L982 79L973 84L969 82L962 84L961 83L954 84L950 88L953 90L953 94L950 94L949 96L950 98L945 99L945 102L940 103L940 106L936 108L932 96L933 92L936 89L940 89L955 80L957 76L953 76L952 79L945 82L943 78L935 79L928 84L931 86L920 87L920 85L916 84L913 86L895 86L875 98L880 98L884 101L889 99L893 103L893 105L891 108L889 115L884 121L875 129L871 131L867 130L861 133L860 136L854 140L854 141L860 148L859 153L851 154L850 148L852 148L850 145L846 144L848 140L845 139L836 142L839 138L838 136L831 141L828 141L826 142L830 146L833 147L836 145L840 146L840 147L836 148L831 153L834 155L839 162L839 164L837 165L839 167L838 172L836 172L830 182L822 187L808 191L807 193L805 194L805 191L801 190L794 195L794 197L802 208L804 213L803 218L792 226L792 222L787 220L785 216L780 215L780 213L778 213L776 224L777 224L779 229L786 235L790 246L788 247L782 242L778 232L774 227L773 228L774 218L770 203L765 206L762 205L762 199L754 187L751 187L751 189L742 190L740 194L736 196L728 204L723 206L722 221L715 228L713 225L704 206L702 191L696 192L692 189L693 188L693 187L687 183L684 179L671 180L659 179L657 175L652 176L643 173L639 166L633 167L636 173L639 176L641 181L642 178L643 178L644 183L650 183L657 177L658 183L663 185L666 188L661 194L660 197L654 202L646 204L645 207L635 211L621 215L618 208L618 203L609 191L607 184L604 183L598 172L596 172L597 168L597 168L597 167L594 173L590 167L599 184L599 186L602 189L604 198L607 200L609 206L620 216L619 217L624 221L642 217L642 220L633 238L612 257L609 263L608 266L610 269L609 274L612 280L613 291L611 295L597 305L599 311L598 317L590 321L591 323L590 329L583 337L578 341L572 344L563 344L554 347L551 345L550 341L551 338L542 325L540 311L533 300L532 296L535 288L538 283L538 280L536 275L537 274L533 264L524 253L527 241L524 237L516 238L512 233L507 233L495 237L487 236L478 238L464 228ZM303 195L310 198L309 199L304 199L302 201L299 199L293 199L299 198L297 195L303 195ZM322 119L325 121L328 121L325 122L321 120L322 119ZM353 115L354 118L353 120L350 120L349 117L346 120L344 120L346 118L344 118L335 117L341 109L345 107L346 107L342 112L344 111L346 111L345 112L351 113L351 115L353 115ZM479 97L484 98L483 102L481 105L472 106L475 103L473 100L479 97ZM494 95L499 99L501 103L505 104L503 106L504 108L502 109L484 111L491 107L485 106L488 105L487 103L487 101L491 102L492 100L487 98L486 95L484 96L483 92L486 87L492 87L489 90L495 90L491 95L494 95ZM440 71L433 70L438 68L432 68L434 66L439 66L443 67L447 66L460 65L459 67L462 69L448 74L437 72L440 71ZM289 63L286 64L285 62L287 61L291 61L289 63ZM284 48L294 52L299 51L309 54L314 58L309 59L328 64L322 69L315 66L311 66L311 68L319 71L320 74L319 76L309 73L316 78L309 77L292 70L284 72L282 71L284 69L295 68L295 66L298 63L296 61L286 59L288 58L281 55L274 56L254 54L251 53L254 52L250 52L249 49L254 46L262 45L260 47L262 49L264 46L271 45L276 48L276 50L284 48ZM442 20L411 22L439 23L436 25L456 22L466 24L444 27L451 27L445 31L445 34L449 36L440 37L445 39L446 41L443 41L446 44L440 44L443 45L442 46L435 46L438 49L431 49L439 51L440 54L435 54L429 52L430 53L427 55L438 55L423 60L412 61L405 65L389 68L386 74L381 76L382 78L380 83L366 81L357 73L355 69L351 66L352 64L350 63L353 60L357 59L359 56L352 58L348 57L349 53L357 54L345 51L348 48L337 40L330 39L310 39L302 36L315 35L296 33L297 32L317 29L319 28L311 27L333 22L353 23L360 21L376 23L370 22L370 20L403 18L425 18L442 20ZM318 24L302 28L286 30L290 30L288 31L291 32L278 36L284 37L276 38L261 38L251 38L251 36L256 36L255 34L264 35L256 32L264 30L259 27L273 26L257 26L246 23L262 20L269 21L271 20L280 19L328 20L312 24L318 24ZM535 144L543 144L542 148L535 146L535 144ZM523 136L526 136L527 137L527 141L524 142L523 136ZM530 95L534 94L535 96L534 98L530 95ZM541 34L531 31L529 29L547 28L560 31L553 32L548 37L538 35L541 34ZM590 152L596 151L592 154L590 152ZM569 34L558 34L559 34L558 33L564 32L569 34ZM548 27L564 26L576 28L564 29L548 27ZM691 385L696 386L696 387L695 388L691 388L691 385ZM639 296L631 319L626 321L622 319L620 311L623 306L622 298L623 295L629 294L633 291L637 283L640 292L639 294L638 294L639 296ZM824 275L828 272L831 274L824 275ZM818 274L801 272L793 269L795 266L802 269L807 269L808 268L821 273L818 274ZM785 262L774 245L765 235L771 235L780 244L782 244L788 250L787 252L795 259L794 266L791 266L785 262ZM822 260L819 261L815 259L811 260L810 258L806 258L803 249L805 244L809 245L809 243L814 241L825 231L827 233L831 235L826 241L827 245L831 247L827 248L826 252L824 254L823 261L822 260ZM727 229L727 232L723 233L721 227L723 223L727 229ZM832 221L825 227L832 218L832 221ZM806 198L804 199L802 199L802 196L808 194L806 198ZM651 45L649 45L655 43L655 41L661 40L684 37L691 37L662 44L654 49L655 51L660 54L649 53L643 51L643 50L646 49L646 48L651 45ZM776 34L786 30L793 31L792 32L776 34ZM778 28L778 31L772 31L759 29L757 27L753 27L767 24L778 28ZM630 26L635 26L643 26L632 28L629 27L631 26L625 26L630 26ZM981 372L976 373L974 378L970 380L963 377L968 373L974 370L980 362L981 365L983 364L984 365L980 370L981 372ZM910 369L908 371L906 371L902 363L907 364L912 364L912 367L911 370L910 369ZM996 355L994 359L992 359L989 365L987 366L985 365L987 362L986 361L983 360L985 358L985 354L980 346L984 348L989 354L996 355ZM904 292L907 303L913 307L916 312L919 312L919 315L925 320L927 328L925 338L915 355L912 355L906 358L902 357L903 355L899 358L891 356L888 350L884 349L884 346L880 348L883 343L883 341L878 347L876 346L873 341L865 337L850 339L845 342L843 344L833 344L828 347L824 347L820 345L822 339L815 323L816 324L815 321L817 323L815 318L816 312L817 310L817 313L824 308L836 305L842 296L843 298L844 297L843 296L844 295L845 295L849 290L853 288L857 291L860 292L859 290L863 285L868 284L866 281L868 281L876 284L879 283L880 284L878 287L876 292L889 299L892 296L894 284L896 280L900 290L902 289L904 292ZM956 306L958 307L964 312L960 310L956 306ZM844 276L854 273L843 278L844 276ZM841 272L841 274L833 274L835 273L841 272ZM919 279L911 278L906 272L902 271L898 273L898 275L896 276L886 272L882 273L885 270L883 265L871 260L869 261L867 258L871 256L867 256L863 253L868 251L872 252L873 258L876 259L879 256L884 255L902 261L906 265L910 267L911 268L908 269L909 271L919 279ZM912 265L916 265L917 264L917 265L919 265L921 263L921 262L923 262L922 265L917 268L912 265ZM863 261L861 260L855 259L856 258L859 258L862 259L863 261ZM843 252L838 255L842 265L840 265L841 262L837 263L836 257L834 258L835 265L832 265L832 260L830 258L833 248L836 246L845 247L847 245L846 249L834 249L833 251L836 254L843 252ZM854 245L855 244L857 247L856 252L854 245ZM845 233L845 230L843 228L839 230L843 226L844 227L849 225L848 223L851 224L851 230L851 233L850 230L848 231L848 234L845 233ZM843 220L843 221L845 219L842 225L840 223L842 220L843 220ZM845 218L847 218L845 215L848 215L849 219L847 219L848 221L847 222L845 218ZM838 208L838 210L844 212L845 215L841 212L841 213L839 212L835 212L836 210L834 208L833 205L834 205L835 199L840 199L840 203L838 208ZM839 181L835 189L834 185L837 180L839 181ZM869 155L872 155L874 156L873 158L870 158L869 159L868 158L869 155ZM875 154L864 156L867 158L865 163L863 164L862 163L862 160L859 158L868 152L877 151L880 146L882 148L887 144L889 140L889 137L890 136L893 135L894 141L892 144L890 152L881 154L877 157L875 156L875 154ZM889 135L888 132L890 130L893 129L894 123L900 127L904 127L904 130L900 131L898 133L893 131L892 134L889 135ZM895 122L895 108L893 106L894 102L896 101L895 99L896 99L898 106L902 114L898 113L896 117L899 120L899 122L897 120L895 122ZM899 47L889 46L889 46L895 45L899 47ZM906 41L907 40L919 41L915 43L906 41ZM901 42L886 43L880 41L882 39L893 39L903 40L901 42Z"/><g id="pins-start"></g></g>
+    </svg>
+  </section>
+
+  <details>
+    <summary>D’où viennent les chiffres du jeu ? Sources et simplifications</summary>
+    <ul>
+      <li>24 pays, qui regroupent environ 62 % des naissances mondiales. Le tirage est pondéré par le nombre de naissances (ONU, World Population Prospects 2024, projection 2026).</li>
+      <li>Ville ou campagne : part de la population urbaine (Banque mondiale, d’après ONU World Urbanization Prospects 2025 ; 2024, ou 2025 pour RD Congo, Niger, Mali et Haïti). Maroc 2004 : recensement du HCP.</li>
+      <li>Vaccins : couverture DTC3, estimations OMS-UNICEF 2025. Paludisme : cas pour 1 000 habitants des zones à risque, OMS 2024.</li>
+      <li>Mortalité avant 5 ans : ONU, World Population Prospects 2024, données 2023. Mortalité maternelle : estimations ONU 2023.</li>
+      <li>Espérance de vie et années d’école, par sexe quand la donnée existe : PNUD, Rapport sur le développement humain 2025 (données 2023). Pour les États-Unis, le Japon, l’Allemagne et la France, valeur nationale (tous sexes).</li>
+      <li>Mariage avant 18 ans : femmes de 20-24 ans, UNICEF (via Girls Not Brides), années d’enquête variables (2006 pour le Brésil, 2012 pour le Niger). Pas de donnée pour les pays riches : l’étape est alors sautée.</li>
+      <li>Travail des enfants (5-17 ans) : estimations nationales de l’OIT, années variables ; pas de donnée pour 7 pays dont le Maroc. Bangladesh : résultats provisoires 2025.</li>
+      <li>Émigration : personnes nées dans le pays et vivant à l’étranger, ONU DESA 2024, rapportées à la population. Destination principale indiquée seulement quand elle est sûre.</li>
+      <li>Revenu : revenu national brut par habitant en parité de pouvoir d’achat (PNUD 2025), multiplié selon le groupe de la famille (20 % les plus pauvres, 60 % aux revenus moyens, 20 % les plus riches) par la part des revenus de ce groupe (Banque mondiale, enquêtes de 2020 à 2025 pour la plupart ; Maroc 2013, Haïti 2012, Tanzanie et Sierra Leone 2018). Ces parts viennent d’enquêtes sur les revenus ou la consommation : c’est un ordre de grandeur.</li>
+      <li>IDH et rang : PNUD, Rapport sur le développement humain 2025 (193 pays).</li>
+      <li>Les tirages s’influencent, avec des écarts moyens mesurés dans les pays à revenu faible et intermédiaire, appliqués à chaque pays sans changer sa moyenne nationale :
+        mortalité avant 5 ans 2 fois plus forte dans les 20 % les plus pauvres que dans les 20 % les plus riches, 1,5 fois plus forte à la campagne (ONU, groupe interagences sur la mortalité de l’enfant, 2018) ;
+        enfants non vaccinés 3,5 fois plus nombreux chez les plus pauvres, 1,6 fois à la campagne (UNICEF, La situation des enfants dans le monde 2023) ;
+        mariage avant 18 ans 4,6 fois plus fréquent chez les plus pauvres, 2,3 fois à la campagne (UNICEF) ;
+        travail des enfants près de 3 fois plus fréquent à la campagne (OIT-UNICEF 2020) ;
+        école : environ 2 ans de moins pour les plus pauvres, 2 ans de plus pour les plus riches (les plus riches ont 3 fois plus de chances de finir le collège, UNESCO 2020) ; 2 ans de moins pour un enfant qui travaille ; une fille mariée avant 18 ans quitte l’école vers 16 ans ;
+        espérance de vie : jusqu’à 6 ans de plus pour les hommes et 3 ans pour les femmes très diplômés (OCDE 2021).</li>
+      <li>Simplifications : ces écarts sont des moyennes mondiales, pas ceux de chaque pays ; l’émigration et le départ en ville ne changent pas la suite de la vie ; le choix de partir en ville n’est pas tiré au sort. Le jeu montre des probabilités, pas des destins.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+const BASE = [
+// code, nom, préposition, continent, naissances 2026 (milliers), mortalité <5 ans (‰, 2023), espérance de vie, scolarité attendue, années d'école adultes, RNB/hab PPA
+["IND","Inde","en Inde","Asie",22988,30.5,72.0,13.0,6.9,9047],
+["CHN","Chine","en Chine","Asie",8625,6.9,78.0,15.5,8.0,22029],
+["NGA","Nigeria","au Nigeria","Afrique",7712,109.1,54.5,10.5,7.6,5569],
+["PAK","Pakistan","au Pakistan","Asie",6936,62.4,67.6,7.9,4.3,5501],
+["COD","RD Congo","en république démocratique du Congo","Afrique",4635,73.8,61.9,10.9,7.4,1431],
+["IDN","Indonésie","en Indonésie","Asie",4420,21.3,71.1,13.3,8.7,13700],
+["ETH","Éthiopie","en Éthiopie","Afrique",4213,41.2,67.3,9.2,2.4,2796],
+["USA","États-Unis","aux États-Unis","Amériques",3673,5.8,79.3,15.9,13.9,73650],
+["BGD","Bangladesh","au Bangladesh","Asie",3408,24.1,74.7,12.3,6.8,8498],
+["BRA","Brésil","au Brésil","Amériques",2493,11.7,75.8,15.8,8.4,18011],
+["EGY","Égypte","en Égypte","Afrique",2459,19.1,71.6,13.1,10.1,16218],
+["TZA","Tanzanie","en Tanzanie","Afrique",2460,39.7,67.0,8.6,6.1,3515],
+["MEX","Mexique","au Mexique","Amériques",1989,12.4,75.1,14.5,9.3,21813],
+["PHL","Philippines","aux Philippines","Asie",1854,25.2,69.8,12.8,10.0,10731],
+["VNM","Viêt Nam","au Viêt Nam","Asie",1307,18.8,74.6,15.5,9.0,13033],
+["RUS","Russie","en Russie","Europe",1213,4.5,73.2,13.2,12.4,39222],
+["NER","Niger","au Niger","Afrique",1157,72.8,61.2,8.3,1.4,1590],
+["MLI","Mali","au Mali","Afrique",1005,86.3,60.4,7.0,1.6,2342],
+["JPN","Japon","au Japon","Asie",746,2.3,84.7,15.5,12.7,47775],
+["DEU","Allemagne","en Allemagne","Europe",690,3.1,81.4,17.3,14.3,64053],
+["FRA","France","en France","Europe",634,3.8,83.3,16.1,11.8,55060],
+["MAR","Maroc","au Maroc","Afrique",614,16.1,75.3,15.1,6.2,8653],
+["SLE","Sierra Leone","en Sierra Leone","Afrique",261,98.1,61.8,9.1,3.5,1714],
+["HTI","Haïti","en Haïti","Amériques",257,53.2,64.9,10.9,5.4,2935],
+];
+const EXTRA = {"IND": {"urban": 35.4, "urban2000": null, "marriage": 23.3, "labour": 1.0, "le_f": 73.6, "le_m": 70.5, "eys_f": 13.0, "eys_m": 12.9, "mmr": 80, "dtp3": 95, "malaria": 1.48, "emig_pct": 1.29, "dest": "aux Émirats arabes unis", "qs": [11.1, 34.2]}, "CHN": {"urban": 65.9, "urban2000": 36.4, "marriage": 2.8, "labour": null, "le_f": 80.9, "le_m": 75.2, "eys_f": 16.0, "eys_m": 15.1, "mmr": 16, "dtp3": 97, "malaria": 0, "emig_pct": 0.82, "dest": "aux États-Unis", "qs": [7.3, 43.7]}, "NGA": {"urban": 63.0, "urban2000": 43.3, "marriage": 33.4, "labour": 28.1, "le_f": 54.7, "le_m": 54.2, "eys_f": 10.2, "eys_m": 10.8, "mmr": 993, "dtp3": 62, "malaria": 294.25, "emig_pct": 0.92, "dest": null, "qs": [7.5, 41.6]}, "PAK": {"urban": 39.2, "urban2000": 33.0, "marriage": 18.3, "labour": 6.8, "le_f": 70.2, "le_m": 65.3, "eys_f": 7.3, "eys_m": 8.6, "mmr": 155, "dtp3": 86, "malaria": 12.77, "emig_pct": 2.79, "dest": null, "qs": [8.2, 42.2]}, "COD": {"urban": 45.1, "urban2000": null, "marriage": 29.9, "labour": 14.7, "le_f": 64.0, "le_m": 59.8, "eys_f": 10.4, "eys_m": 11.5, "mmr": 427, "dtp3": 65, "malaria": 321.89, "emig_pct": 1.98, "dest": null, "qs": [5.5, 51.1]}, "IDN": {"urban": 58.8, "urban2000": 42.0, "marriage": 16.3, "labour": 1.7, "le_f": 73.3, "le_m": 69.0, "eys_f": 13.6, "eys_m": 13.1, "mmr": 140, "dtp3": 82, "malaria": 2.23, "emig_pct": 1.33, "dest": null, "qs": [8.3, 43.2]}, "ETH": {"urban": 23.6, "urban2000": null, "marriage": 40.3, "labour": 18.7, "le_f": 70.7, "le_m": 64.1, "eys_f": 8.6, "eys_m": 9.7, "mmr": 195, "dtp3": 81, "malaria": 138, "emig_pct": 0.96, "dest": null, "qs": [8.3, 39.7]}, "USA": {"urban": 80.1, "urban2000": 79.1, "marriage": null, "labour": null, "le_f": null, "le_m": null, "eys_f": null, "eys_m": null, "mmr": 17, "dtp3": 94, "malaria": null, "emig_pct": 0.93, "dest": null, "qs": [5.1, 47.1]}, "BGD": {"urban": 32.7, "urban2000": 23.3, "marriage": 47.2, "labour": 9.2, "le_f": 76.4, "le_m": 73.0, "eys_f": 12.4, "eys_m": 11.9, "mmr": 115, "dtp3": 92, "malaria": 0.86, "emig_pct": 5.08, "dest": null, "qs": [8.8, 40.1]}, "BRA": {"urban": 87.9, "urban2000": 81.1, "marriage": 26.2, "labour": 1.5, "le_f": 79.0, "le_m": 72.8, "eys_f": 16.5, "eys_m": 15.1, "mmr": 67, "dtp3": 86, "malaria": 3.75, "emig_pct": 1.04, "dest": null, "qs": [3.9, 55.4]}, "EGY": {"urban": 42.8, "urban2000": 42.7, "marriage": 15.8, "labour": 8.5, "le_f": 73.8, "le_m": 69.5, "eys_f": 13.0, "eys_m": 13.2, "mmr": 17, "dtp3": 98, "malaria": 0, "emig_pct": 4.21, "dest": null, "qs": [9.7, 38.6]}, "TZA": {"urban": 36.2, "urban2000": 22.2, "marriage": 29.1, "labour": 15.0, "le_f": 69.8, "le_m": 64.2, "eys_f": 8.7, "eys_m": 8.5, "mmr": 276, "dtp3": 83, "malaria": 137, "emig_pct": 0.34, "dest": null, "qs": [6.9, 48.1]}, "MEX": {"urban": 79.8, "urban2000": 74.9, "marriage": 18.2, "labour": 4.3, "le_f": 77.8, "le_m": 72.2, "eys_f": 15.0, "eys_m": 13.9, "mmr": 42, "dtp3": 89, "malaria": 0.1, "emig_pct": 8.94, "dest": "aux États-Unis", "qs": [5.6, 48.9]}, "PHL": {"urban": 55.5, "urban2000": 39.1, "marriage": 9.4, "labour": 1.2, "le_f": 72.8, "le_m": 66.9, "eys_f": 13.1, "eys_m": 12.1, "mmr": 84, "dtp3": 71, "malaria": 0.35, "emig_pct": 6.08, "dest": "aux États-Unis", "qs": [6.9, 46.9]}, "VNM": {"urban": 38.5, "urban2000": 24.4, "marriage": 14.6, "labour": 5.7, "le_f": 79.3, "le_m": 69.9, "eys_f": 15.5, "eys_m": 15.4, "mmr": 48, "dtp3": 97, "malaria": 0, "emig_pct": 3.68, "dest": null, "qs": [6.8, 43.2]}, "RUS": {"urban": 75.1, "urban2000": null, "marriage": 6.2, "labour": null, "le_f": 79.0, "le_m": 67.3, "eys_f": 13.2, "eys_m": 13.1, "mmr": 9, "dtp3": 97, "malaria": null, "emig_pct": 6.28, "dest": null, "qs": [7.7, 41.0]}, "NER": {"urban": 18.4, "urban2000": null, "marriage": 76.3, "labour": 42.4, "le_f": 62.1, "le_m": 60.3, "eys_f": 7.5, "eys_m": 9.1, "mmr": 350, "dtp3": 87, "malaria": 305, "emig_pct": 1.68, "dest": null, "qs": [8.7, 42.2]}, "MLI": {"urban": 32.2, "urban2000": null, "marriage": 48.5, "labour": 21.0, "le_f": 61.9, "le_m": 59.0, "eys_f": 6.3, "eys_m": 7.7, "mmr": 367, "dtp3": 84, "malaria": 346, "emig_pct": 5.44, "dest": null, "qs": [7.6, 43.9]}, "JPN": {"urban": 92.2, "urban2000": 78.6, "marriage": null, "labour": null, "le_f": null, "le_m": null, "eys_f": null, "eys_m": null, "mmr": 3, "dtp3": 91, "malaria": null, "emig_pct": 0.81, "dest": null, "qs": [6.8, 39.4]}, "DEU": {"urban": 82.0, "urban2000": 80.1, "marriage": null, "labour": null, "le_f": null, "le_m": null, "eys_f": null, "eys_m": null, "mmr": 4, "dtp3": 89, "malaria": null, "emig_pct": 5.08, "dest": null, "qs": [6.9, 40.9]}, "FRA": {"urban": 78.8, "urban2000": null, "marriage": null, "labour": null, "le_f": null, "le_m": null, "eys_f": null, "eys_m": null, "mmr": 7, "dtp3": 96, "malaria": null, "emig_pct": 3.83, "dest": null, "qs": [7.7, 39.7]}, "MAR": {"urban": 62.8, "urban2000": null, "marriage": 13.7, "labour": null, "le_f": 77.6, "le_m": 73.2, "eys_f": 15.1, "eys_m": 15.1, "mmr": 70, "dtp3": 96, "malaria": null, "emig_pct": 9.62, "dest": "en France", "qs": [6.7, 47.0]}, "SLE": {"urban": 45.4, "urban2000": 35.5, "marriage": 29.6, "labour": 21.0, "le_f": 63.5, "le_m": 60.1, "eys_f": 7.8, "eys_m": 10.3, "mmr": 354, "dtp3": 91, "malaria": 283, "emig_pct": 0.75, "dest": null, "qs": [7.9, 44.2]}, "HTI": {"urban": 55.6, "urban2000": null, "marriage": 14.9, "labour": 21.6, "le_f": 68.3, "le_m": 61.7, "eys_f": 10.8, "eys_m": 11.0, "mmr": 328, "dtp3": 58, "malaria": 8.7, "emig_pct": 17.34, "dest": null, "qs": [5.5, 47.1]}};
+const DATA = BASE.map(r => ({ code: r[0], nom: r[1], en: r[2], cont: r[3], births: r[4], u5: r[5], le: r[6], eys: r[7], mys: r[8], gni: r[9], ...EXTRA[r[0]] }));
+const PIN = {"BGD": [749.7, 184.5], "BRA": [361.9, 289.1], "CHN": [774.4, 147.8], "COD": [562.2, 261.4], "DEU": [529.0, 107.1], "EGY": [581.6, 175.3], "ETH": [607.6, 224.0], "FRA": [505.8, 119.7], "HTI": [299.6, 197.4], "IDN": [814.6, 250.5], "IND": [719.9, 189.2], "JPN": [884.3, 149.7], "MAR": [472.3, 170.9], "MEX": [216.0, 184.4], "MLI": [498.1, 200.1], "NER": [527.2, 201.7], "NGA": [521.8, 225.2], "PAK": [694.7, 165.7], "PHL": [835.4, 206.5], "RUS": [746.1, 85.0], "SLE": [467.1, 226.2], "TZA": [594.8, 267.2], "USA": [224.1, 146.6], "VNM": [799.4, 205.6]};
+const WORLD_BIRTHS = 132503;
+const TOTAL = DATA.reduce((s, c) => s + c.births, 0);
+const BY = Object.fromEntries(DATA.map(c => [c.code, c]));
+const MA = BY.MAR;
+const HDI = {IND:[0.685,130],CHN:[0.797,78],NGA:[0.560,164],PAK:[0.544,168],COD:[0.522,171],IDN:[0.728,113],ETH:[0.497,180],USA:[0.938,17],BGD:[0.685,130],BRA:[0.786,84],EGY:[0.754,100],TZA:[0.555,165],MEX:[0.789,81],PHL:[0.720,117],VNM:[0.766,93],RUS:[0.832,64],NER:[0.419,188],MLI:[0.419,188],JPN:[0.925,23],DEU:[0.959,5],FRA:[0.920,26],MAR:[0.710,120],SLE:[0.467,185],HTI:[0.554,166]};
+const CONTS = ["Asie", "Afrique", "Amériques", "Europe"];
+
+const $ = s => document.querySelector(s);
+const fmt = (n, d = 0) => Number(n).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const fmt1 = n => fmt(n, Number.isInteger(n) ? 0 : 1);
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const has = v => v !== null && v !== undefined;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v) }
+function pickCountry() { let r = Math.random() * TOTAL; for (const c of DATA) { if ((r -= c.births) < 0) return c } return DATA[0] }
+const sur = (pct, base = 10) => fmt(Math.round(pct / 100 * base * 10) / 10) + ' sur ' + base;
+function schoolLabel(y) {
+  if (y === 0) return `Tu ne vas jamais à l’école.`;
+  if (y < 5) return `Tu quittes l’école avant la fin du primaire, vers ${6 + y} ans.`;
+  if (y === 5) return `Tu termines l’école primaire, puis tu t’arrêtes.`;
+  if (y < 9) return `Tu quittes l’école pendant le collège, vers ${6 + y} ans.`;
+  if (y === 9) return `Tu termines le collège, puis tu t’arrêtes.`;
+  if (y < 12) return `Tu vas au lycée, mais tu t’arrêtes avant le bac.`;
+  if (y === 12) return `Tu obtiens le baccalauréat (ou son équivalent).`;
+  if (y < 16) return `Tu fais quelques années d’études après le bac.`;
+  return `Tu fais de longues études après le bac.`;
+}
+const sexVal = (c, girl, f, m, all) => has(c[girl ? f : m]) ? c[girl ? f : m] : c[all];
+
+/* Écarts à l'intérieur des pays (moyennes des pays à revenu faible et intermédiaire) :
+   mortalité <5 ans : 20 % les plus pauvres = 2,06 × les plus riches (UN IGME, Lancet Glob Health 2018) ; campagne = 1,5 × ville (UN IGME 2018)
+   enfants non vaccinés : 20,6 % vs 5,9 % (≈ 3,5 ×) ; campagne 15,1 % vs ville 9,4 % (≈ 1,6 ×) (UNICEF, SOWC 2023)
+   mariage avant 18 ans : 36,2 % vs 7,9 % (≈ 4,6 ×) ; campagne 28,4 % vs ville 12,6 % (≈ 2,3 ×) (UNICEF, childmarriagedata.org)
+   travail des enfants : campagne 14 % vs ville 5 % (≈ 2,8 ×) (OIT-UNICEF 2020)
+   école : les 20 % les plus riches ont 3 fois plus de chances de finir le collège (UNESCO, GEM 2020)
+   espérance de vie à 30 ans : diplômés du supérieur vs sans bac, +6 ans (hommes), +3 ans (femmes) (OCDE 2021) */
+const GAP = { u5: [2.06, 1.5], novac: [3.5, 1.6], marriage: [4.6, 2.3], labour: [1, 2.8] };
+const WW = [0.2, 0.6, 0.2];
+function personal(pNat, key, L) {
+  const [rw, rr] = GAP[key], u = L.c.urban / 100;
+  const mW = [rw, Math.sqrt(rw), 1];
+  const eW = L.q === null ? 1 : WW.reduce((s, w, k) => s + w * mW[k], 0);
+  const eR = u + (1 - u) * rr;
+  const m = (L.q === null ? 1 : mW[L.q] / eW) * ((L.urban ? 1 : rr) / eR);
+  return Math.min(pNat * m, pNat < 1 ? 0.97 : 970);
+}
+const SCHOOL_SHIFT = [-2, 0, 2];
+function makeLife() {
+  const c = pickCountry();
+  const girl = Math.random() < 0.485;
+  const L = { c, girl, e: girl ? 'e' : '' };
+  L.urban = Math.random() * 100 < c.urban;
+  { const r = Math.random(); L.q = c.qs ? (r < 0.2 ? 0 : r < 0.8 ? 1 : 2) : null; }
+  if (has(c.dtp3)) { L.pNovac = personal((100 - c.dtp3) / 100, 'novac', L); L.vaccinated = Math.random() >= L.pNovac } else L.vaccinated = null;
+  L.u5 = personal(c.u5, 'u5', L);
+  L.childDeath = Math.random() * 1000 < L.u5;
+  if (L.childDeath) { L.deathAge = Math.random() < 0.7 ? 0 : 1 + Math.floor(Math.random() * 4); return L }
+  L.pLabour = has(c.labour) ? personal(c.labour / 100, 'labour', L) : null;
+  L.works = L.pLabour === null ? null : Math.random() < L.pLabour;
+  L.pMarriage = girl && has(c.marriage) ? personal(c.marriage / 100, 'marriage', L) : null;
+  L.married = L.pMarriage !== null && Math.random() < L.pMarriage;
+  const eys = sexVal(c, girl, 'eys_f', 'eys_m', 'eys');
+  L.eys = eys;
+  let y = eys + (L.q === null ? 0 : SCHOOL_SHIFT[L.q]) + gauss() * 1.8;
+  if (L.works) y -= 2;
+  y = Math.max(0, Math.min(20, Math.round(y)));
+  if (L.married && y > 10) { L.schoolCut = true; y = 10 }
+  L.school = y;
+  L.abroad = has(c.emig_pct) ? Math.random() * 100 < c.emig_pct : false;
+  L.movedToCity = null;
+  const le = sexVal(c, girl, 'le_f', 'le_m', 'le');
+  const g = girl ? 3 : 6;
+  L.eduShift = Math.max(-g, Math.min(g, g / 6 * (y - eys)));
+  const mu = le + c.u5 / 1000 * le + L.eduShift;
+  L.le = le;
+  L.deathAge = Math.max(6, Math.min(100, Math.round(mu + gauss() * 9)));
+  L.perDay = c.gni / 365 * (L.q === null ? 1 : L.q === 0 ? c.qs[0] / 20 : L.q === 2 ? c.qs[1] / 20 : (100 - c.qs[0] - c.qs[1]) / 60);
+  return L;
+}
+const likeYou = L => {
+  const p = [];
+  if (L.q !== null) p.push(['famille parmi les 20 % les plus pauvres', 'famille aux revenus moyens', 'famille parmi les 20 % les plus riches'][L.q]);
+  p.push(L.urban ? 'en ville' : 'à la campagne');
+  return p.join(', ');
+};
+
+/* ---------- map ---------- */
+function pins(target, hl) {
+  const g = document.getElementById(target); g.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  const mx = Math.max(...DATA.map(c => c.births));
+  for (const c of DATA) {
+    const [x, y] = PIN[c.code]; const r = 3 + 11 * Math.sqrt(c.births / mx);
+    const ci = document.createElementNS(ns, 'circle'); ci.setAttribute('cx', x); ci.setAttribute('cy', y); ci.setAttribute('r', r);
+    ci.setAttribute('class', 'pin' + (hl && hl !== c.code ? ' other' : '')); g.appendChild(ci);
+    if (hl === c.code) { const h = document.createElementNS(ns, 'circle'); h.setAttribute('cx', x); h.setAttribute('cy', y); h.setAttribute('r', r + 6); h.setAttribute('class', 'halo'); g.appendChild(h) }
+  }
+}
+const MAP = id => `<svg class="map" viewBox="0 0 1000 440" role="img" aria-label="Carte du monde"><g transform="translate(0,-30)"><path d="${document.querySelector('#start path').getAttribute('d')}"/><g id="${id}"></g></g></svg>`;
+const maroc = txt => (L.c.code === 'MAR') ? '' : `<p class="maroc"><b>Et au Maroc ?</b> ${txt}</p>`;
+const roll = (ok, txtOk, txtKo) => `<p class="verdict ${ok ? 'ok' : 'ko'}">${ok ? txtOk : txtKo}</p>`;
+
+/* ---------- one life ---------- */
+let L, stage, steps;
+function startLife() {
+  L = makeLife(); stage = 0;
+  steps = ['birth', 'vaccine', 'child', 'school', 'teen', 'migration', 'adult', 'end'];
+  $('#start').hidden = true; $('#class').hidden = true;
+  const s = $('#life'); s.hidden = false;
+  s.innerHTML = `<div class="row" style="justify-content:space-between"><h2>Ta vie</h2><button id="again">Renaître ailleurs</button></div><div class="steps" id="steps"></div><div class="row" id="nextrow"><button class="primary" id="next">Continuer</button></div>`;
+  $('#again').onclick = startLife;
+  $('#next').onclick = nextStep;
+  nextStep();
+  s.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+}
+function addStep(age, html) {
+  const d = document.createElement('div'); d.className = 'step fade';
+  d.innerHTML = `<div class="age">${age}</div><div class="panel" style="padding:18px">${html}</div>`;
+  $('#steps').appendChild(d); d.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' }); return d;
+}
+function nextStep() {
+  const name = steps[stage++];
+  if (!name) return;
+  STEP[name]();
+}
+const QLAB = ['des 20 % les plus pauvres', 'des 60 % aux revenus moyens', 'des 20 % les plus riches'];
+const cmp = (label, mine, ma) => L.c.code === 'MAR' ? `<div class="cmp one"><span class="cl">${label}</span><div><b>${mine}</b><span>au Maroc</span></div></div>`
+  : `<div class="cmp"><span class="cl">${label}</span><div><b>${mine}</b><span>ton pays</span></div><div class="ma"><b>${ma}</b><span>au Maroc</span></div></div>`;
+function richBlock() {
+  const c = L.c;
+  const rich = c.code === 'USA' ? BY.DEU : BY.USA, poor = c.code === 'COD' ? BY.NER : BY.COD;
+  const list = [rich, c, ...(c.code === 'MAR' ? [] : [MA]), poor].sort((a, b) => b.gni - a.gni);
+  const mx = rich.gni;
+  const rows = list.map(p => `<div class="bar ${p === c ? 'me' : ''}"><span>${p === c ? 'Ton pays' : cap(p.nom)}</span><div class="track"><div class="fill" style="width:${Math.max(1, p.gni / mx * 100)}%"></div></div><span class="v">${fmt(Math.round(p.gni / 100) * 100)} $</span></div>`).join('');
+  const fam = L.q === null ? '' : `<p class="you">Ta famille fait partie <b>${QLAB[L.q]}</b> : ${['elle vit avec bien moins que la moyenne du pays', 'ses revenus sont proches de la moyenne du pays', 'elle vit avec bien plus que la moyenne du pays'][L.q]}.</p>`;
+  return `<p><b>Richesse de ton pays</b> : revenu moyen par habitant et par an (proche du PIB par habitant), en tenant compte des prix de chaque pays.</p><div class="bars">${rows}</div>${fam}`;
+}
+const STEP = {
+  birth() {
+    const { c, e } = L;
+    addStep('0 an', `<p class="kicker">Naissance</p>
+      <p class="big">Tu es né${e} ${c.en}, ${L.urban ? 'en ville' : 'à la campagne'}.</p>
+      <p><span class="cont c-${c.cont}">${c.cont}</span> &nbsp;Tu es ${L.girl ? 'une fille' : 'un garçon'}.</p>
+      ${MAP('pins-life')}
+      ${richBlock()}
+      ${cmp('Habitants qui vivent en ville', `${fmt(Math.round(c.urban))} sur 100`, `${fmt(Math.round(MA.urban))} sur 100`)}`);
+    pins('pins-life', c.code);
+  },
+  vaccine() {
+    const { c } = L;
+    if (L.vaccinated === null) return nextStep();
+    addStep('1 an', `<p class="kicker">Vaccins</p>
+      ${roll(L.vaccinated, 'Tu es vacciné' + L.e + '.', 'Tu n’es pas vacciné' + L.e + '.')}
+      <p class="you">Pour un enfant comme toi (${likeYou(L)}), le risque de ne pas être vacciné est d’environ <b>${fmt(Math.round(L.pNovac * 100))} sur 100</b>, contre ${fmt(Math.round(100 - c.dtp3))} sur 100 en moyenne dans ton pays.</p>
+      ${cmp('Enfants vaccinés (diphtérie, tétanos, coqueluche)', `${fmt(Math.round(c.dtp3))} sur 100`, `${fmt(Math.round(MA.dtp3))} sur 100`)}`);
+  },
+  child() {
+    const { c } = L; const n = Math.max(1, Math.round(L.u5)), nat = Math.round(c.u5);
+    addStep('0-5 ans', `<p class="kicker">Petite enfance</p>
+      <p>Dans ton pays, ${nat} enfants sur 1 000 meurent avant 5 ans. Pour un enfant comme toi (${likeYou(L)}), c’est environ <b>${n} sur 1 000</b>${L.vaccinated === false ? ', et tu n’es pas protégé' + L.e + ' par les vaccins' : ''}.</p>
+      <div class="dots" id="dots" aria-label="1000 enfants"></div>
+      <div class="legend"><b class="l-a">atteint 5 ans</b><b class="l-d">meurt avant 5 ans</b></div>
+      <p class="verdict" id="verdict">Tirage en cours…</p>
+      ${cmp('Enfants morts avant 5 ans (moyenne)', `${nat} sur 1 000`, `16 sur 1 000`)}
+      ${has(c.malaria) && c.malaria >= 1 ? cmp('Paludisme : cas par an pour 1 000 habitants', fmt(Math.round(c.malaria)), '0') : ''}`);
+    drawDots(n);
+  },
+  school() {
+    const { c } = L; const y = L.school;
+    const bar = (lab, v, me) => `<div class="bar ${me ? 'me' : ''}"><span>${lab}</span><div class="track"><div class="fill" style="width:${v / 20 * 100}%"></div></div><span class="v">${fmt1(v)} ans</span></div>`;
+    addStep('6-20 ans', `<p class="kicker">École</p>
+      <p class="big">${y} année${y > 1 ? 's' : ''} d’école</p>
+      <p>${schoolLabel(y)}</p>
+      ${L.q === 0 ? '<p class="you">Ta famille est pauvre : les enfants des familles les plus pauvres vont moins longtemps à l’école.</p>' : L.q === 2 ? '<p class="you">Ta famille est riche : les enfants des familles les plus riches ont 3 fois plus de chances de finir le collège.</p>' : ''}
+      ${L.schoolCut ? '<p class="you">Mariée avant 18 ans, tu as dû quitter l’école.</p>' : ''}
+      ${has(c.eys_f) ? `<div class="bars">${bar('Toi', y, true)}${bar('Les filles', c.eys_f)}${bar('Les garçons', c.eys_m)}</div><p class="note">Années d’école prévues dans ton pays.</p>` : ''}
+      ${L.works === null ? '' : roll(!L.works, 'Tu ne travailles pas enfant.', `Tu travailles enfant pour aider ta famille : tu vas moins longtemps à l’école.`) + `<p class="you">Dans ton pays, ${Math.round(c.labour) <= 1 ? '1 enfant' : fmt(Math.round(c.labour)) + ' enfants'} sur 100 travaillent ; pour un enfant comme toi (${likeYou(L)}), environ ${fmt(Math.max(1, Math.round(L.pLabour * 100)))} sur 100.</p>`}
+      ${cmp('Années d’école des adultes (tes parents)', `${fmt1(c.mys)} ans`, `${fmt1(MA.mys)} ans`)}`);
+  },
+  teen() {
+    const { c } = L;
+    if (!has(c.marriage)) return nextStep();
+    addStep('17 ans', `<p class="kicker">Adolescence</p>
+      ${L.girl ? roll(!L.married, 'Tu n’es pas mariée à 17 ans.', 'Tu es mariée avant tes 18 ans.') + `<p class="you">Pour une fille comme toi (${likeYou(L)}), le risque était d’environ <b>${fmt(Math.max(1, Math.round(L.pMarriage * 100)))} sur 100</b>.</p>` : `<p>Les garçons sont rarement mariés si jeunes. Les filles, beaucoup plus souvent, surtout dans les familles pauvres et à la campagne.</p>`}
+      ${cmp('Jeunes femmes mariées avant 18 ans', `${sur(c.marriage, 100)}`, `${sur(MA.marriage, 100)}`)}`);
+  },
+  migration() {
+    const { c } = L;
+    const intl = () => !has(c.emig_pct) ? '' : roll(!L.abroad, 'Tu restes vivre dans ton pays.', `Tu pars vivre ${c.dest || 'à l’étranger'}. Tu y gagnes souvent plus et tu envoies de l’argent à ta famille.`)
+      + cmp('Personnes nées dans le pays qui vivent à l’étranger', `${fmt1(Math.round(c.emig_pct * 10) / 10)} sur 100`, `${fmt1(Math.round(MA.emig_pct * 10) / 10)} sur 100`);
+    if (L.urban) { addStep('20-25 ans', `<p class="kicker">Migrations</p>${intl()}`); return; }
+    addStep('20-25 ans', `<p class="kicker">Migrations</p>
+      <p>Tu vis à la campagne. Beaucoup de ruraux partent vivre en ville : c’est l’<b>exode rural</b>.</p>
+      <p><b>À toi de choisir :</b></p>
+      <div class="row"><button class="primary" id="go-city">Partir en ville</button><button id="stay">Rester au village</button></div>
+      <div id="mig-out" style="display:flex;flex-direction:column;gap:12px"></div>`);
+    const btn = $('#next'); btn.disabled = true;
+    const done = city => {
+      L.movedToCity = city; $('#go-city').disabled = true; $('#stay').disabled = true;
+      $('#mig-out').innerHTML = (city
+        ? `<p class="verdict ok">En ville, tu trouves plus facilement du travail, une école, un médecin. Mais tu vis peut-être dans un bidonville.</p>`
+        : `<p class="verdict">Tu restes près de ta famille et de tes terres. Mais l’école, le médecin et le travail sont loin.</p>`) + intl();
+      btn.disabled = false;
+    };
+    $('#go-city').onclick = () => done(true); $('#stay').onclick = () => done(false);
+  },
+  adult() {
+    const { c } = L; const mx = Math.max(220, L.perDay * 1.05);
+    const bar = (lab, val, me) => `<div class="bar ${me ? 'me' : ''}"><span>${lab}</span><div class="track"><div class="fill" style="width:${Math.min(100, val / mx * 100)}%"></div></div><span class="v">${fmt(val)} $</span></div>`;
+    addStep('30 ans', `<p class="kicker">Vie d’adulte</p>
+      <p class="big">${fmt(L.perDay)} dollars par jour</p>
+      <p>${L.q !== null ? `C’est le revenu moyen d’un habitant parmi ${['les 20 % les plus pauvres', 'les 60 % aux revenus moyens', 'les 20 % les plus riches'][L.q]} de ton pays. Les 20 % les plus riches y reçoivent ${fmt(Math.round(c.qs[1]))} % de tous les revenus, les 20 % les plus pauvres ${fmt(Math.round(c.qs[0]))} %.` : 'C’est le revenu moyen d’un habitant de ton pays.'}</p>
+      <div class="bars">${bar('Toi', L.perDay, true)}${bar('Moyenne de ton pays', c.gni / 365)}${c.code === 'MAR' ? '' : bar('Moyenne au Maroc', MA.gni / 365)}${c.code === 'FRA' ? '' : bar('Moyenne en France', BY.FRA.gni / 365)}</div>
+      <p class="note">En tenant compte des prix de chaque pays.</p>
+      ${L.girl && has(c.mmr) ? cmp('Si tu as un enfant, risque de mourir en accouchant', `1 sur ${fmt(Math.round(100000 / c.mmr))}`, `1 sur ${fmt(Math.round(100000 / MA.mmr))}`) : ''}`);
+  },
+  end() {
+    addStep(`${L.deathAge} ans`, `<p class="kicker">Fin de vie</p>
+      <p class="big">Tu vis jusqu’à ${L.deathAge} ans.</p>
+      ${Math.abs(L.eduShift) >= 1 ? `<p class="you">${L.eduShift > 0 ? 'Tu es allé' + L.e + ' plus longtemps à l’école que la moyenne : les personnes diplômées vivent en général plus longtemps.' : 'Tu es allé' + L.e + ' moins longtemps à l’école que la moyenne : les personnes peu diplômées vivent en général moins longtemps.'}</p>` : ''}
+      ${cmp(`Espérance de vie des ${L.girl ? 'femmes' : 'hommes'}`, `${fmt1(L.le)} ans`, `${fmt1(L.girl ? MA.le_f : MA.le_m)} ans`)}`);
+    finish();
+  },
+};
+function drawDots(n) {
+  const box = $('#dots'); const cells = []; const dead = new Set();
+  while (dead.size < n) dead.add(Math.floor(Math.random() * 1000));
+  for (let i = 0; i < 1000; i++) { const el = document.createElement('i'); if (dead.has(i)) el.className = 'd'; box.appendChild(el); cells.push(el) }
+  const btn = $('#next'); btn.disabled = true;
+  const pool = [...Array(1000).keys()].filter(i => L.childDeath ? dead.has(i) : !dead.has(i));
+  const mine = pool[Math.floor(Math.random() * pool.length)];
+  let k = 0, prev = null; const hops = reduce ? 0 : 14;
+  const hop = () => {
+    if (prev) prev.classList.remove('me');
+    const i = k < hops ? Math.floor(Math.random() * 1000) : mine;
+    prev = cells[i]; prev.classList.add('me');
+    if (k++ < hops) setTimeout(hop, 70 + k * 12); else reveal();
+  };
+  const reveal = () => {
+    const v = $('#verdict');
+    if (L.childDeath) {
+      v.className = 'verdict ko';
+      v.textContent = `Tu fais partie des ${n} enfants sur 1 000 qui n’atteignent pas 5 ans. Ta vie s’arrête ${L.deathAge === 0 ? 'avant ton premier anniversaire' : 'à ' + L.deathAge + ' an' + (L.deathAge > 1 ? 's' : '')}.`;
+      btn.disabled = false; btn.textContent = 'Voir le bilan'; btn.onclick = () => finish();
+    } else {
+      v.className = 'verdict ok'; v.textContent = `Tu fais partie des ${1000 - n} enfants sur 1 000 qui fêtent leurs 5 ans.`;
+      btn.disabled = false;
+    }
+  };
+  hop();
+}
+function finish() {
+  const { c, e } = L; $('#nextrow').hidden = true;
+  let lines;
+  if (L.childDeath) lines = `Tu es né${e} ${c.en}, ${L.urban ? 'en ville' : 'à la campagne'}, et tu n’as pas atteint 5 ans. ${c.code === 'JPN' ? '' : `Au Japon, ce risque est de 2 sur 1 000 ; ${c.en}, de ${Math.round(c.u5)} sur 1 000.`}`;
+  else {
+    const parts = [`Tu es né${e} ${c.en}, ${L.urban ? 'en ville' : 'à la campagne'}${L.q !== null ? ', dans une famille ' + QLAB[L.q].replace('des ', 'parmi les ') : ''}`];
+    if (L.vaccinated === false) parts.push(`tu n’as pas été vacciné${e}`);
+    parts.push(`tu es allé${e} ${L.school} an${L.school > 1 ? 's' : ''} à l’école`);
+    if (L.works) parts.push('tu as travaillé enfant');
+    if (L.married) parts.push('tu as été mariée avant 18 ans');
+    if (L.movedToCity) parts.push('tu es parti' + e + ' en ville');
+    if (L.abroad) parts.push('tu as émigré' + (c.dest ? ' ' + c.dest : ''));
+    lines = parts.join(', ') + `, et tu meurs à ${L.deathAge} ans.`;
+  }
+  const h = HDI[c.code], hm = HDI.MAR;
+  addStep('Bilan', `<p class="kicker">Ta vie en résumé</p><p style="font-size:1.1rem">${lines}</p>
+    ${cmp('IDH (indice de développement humain) et rang mondial sur 193', `${fmt(h[0], 3)} · ${h[1]}e`, `${fmt(hm[0], 3)} · ${hm[1]}e`)}
+    <p><b>Qu’est-ce qui, dans cette vie, ne dépendait pas de toi ? Qu’est-ce que tu as choisi ?</b></p>
+    <div class="row"><button class="primary" id="again2">Renaître ailleurs</button></div>`);
+  $('#again2').onclick = startLife;
+}
+
+/* ---------- whole class ---------- */
+function startClass() {
+  $('#start').hidden = true; $('#life').hidden = true;
+  const s = $('#class'); s.hidden = false;
+  s.innerHTML = `<h2>Toute la classe vient au monde</h2>
+    <div class="row"><label for="n">Nombre d’élèves</label><input id="n" type="number" min="5" max="40" value="28"><button class="primary" id="go">Faire naître la classe</button></div>
+    <div id="res" style="display:flex;flex-direction:column;gap:18px"></div>`;
+  $('#go').onclick = runClass; runClass();
+  s.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+}
+function runClass() {
+  const n = Math.max(5, Math.min(40, parseInt($('#n').value) || 28));
+  const lives = Array.from({ length: n }, makeLife);
+  const counts = Object.fromEntries(CONTS.map(k => [k, 0])); lives.forEach(l => counts[l.c.cont]++);
+  const dead = lives.filter(l => l.childDeath), adults = lives.filter(l => !l.childDeath);
+  const avg = a => a.length ? a.reduce((s, l) => s + l.school, 0) / a.length : null;
+  const gF = avg(adults.filter(l => l.girl)), gM = avg(adults.filter(l => !l.girl));
+  const rural = lives.filter(l => !l.urban).length;
+  const girls = adults.filter(l => l.girl), married = girls.filter(l => l.married).length;
+  const abroad = adults.filter(l => l.abroad).length;
+  const minA = adults.length ? adults.reduce((a, b) => a.deathAge <= b.deathAge ? a : b) : null;
+  const maxA = adults.length ? adults.reduce((a, b) => a.deathAge >= b.deathAge ? a : b) : null;
+  const varC = { "Afrique": "var(--afr)", "Asie": "var(--asi)", "Amériques": "var(--ame)", "Europe": "var(--eur)" };
+  const tile = (num, txt) => `<div class="tile"><span class="n">${num}</span><span class="t">${txt}</span></div>`;
+  const pl = (k, w) => `${k} ${w}${k > 1 ? 's' : ''}`;
+  $('#res').innerHTML = `
+    <div class="stack" role="img" aria-label="Répartition par continent">${CONTS.filter(k => counts[k]).map(k => `<div style="flex:${counts[k]};background:${varC[k]}" title="${k}">${counts[k]}</div>`).join('')}</div>
+    <div class="legend">${CONTS.map(k => `<span><span class="cont c-${k}">${k}</span> ${pl(counts[k], 'élève')}</span>`).join('')}</div>
+    <div class="summary">
+      ${tile(`${dead.length} sur ${n}`, `n’ont pas atteint 5 ans`)}
+      ${tile(`${rural} sur ${n}`, `sont nés à la campagne`)}
+      ${gF !== null && gM !== null ? tile(`${fmt1(Math.round(gF * 10) / 10)} / ${fmt1(Math.round(gM * 10) / 10)}`, `années d’école en moyenne : filles / garçons`) : ''}
+      ${(() => { const p = adults.filter(l => l.q === 0), r = adults.filter(l => l.q === 2); return p.length && r.length ? tile(`${fmt1(Math.round(avg(p) * 10) / 10)} / ${fmt1(Math.round(avg(r) * 10) / 10)}`, `années d’école : familles les plus pauvres / les plus riches`) : '' })()}
+      ${tile(`${married} sur ${girls.length}`, `filles mariées avant 18 ans`)}
+      ${adults.length ? (() => { const lo = adults.reduce((a, b) => a.perDay <= b.perDay ? a : b), hi = adults.reduce((a, b) => a.perDay >= b.perDay ? a : b); return tile(`${fmt(lo.perDay)} à ${fmt(hi.perDay)} $`, `par jour (${lo.c.nom} → ${hi.c.nom})`) })() : ''}
+      ${tile(`${abroad}`, `${abroad > 1 ? 'sont partis' : 'est parti'} vivre à l’étranger`)}
+      ${minA ? tile(`${minA.deathAge} à ${maxA.deathAge} ans`, `âge au décès (${minA.c.nom} → ${maxA.c.nom})`) : ''}
+    </div>
+    <div class="grid">${lives.map((l, i) => `<div class="card ${l.childDeath ? 'dead' : ''}" style="--c:${varC[l.c.cont]}">
+      <span class="who"><span>Élève ${i + 1}</span><span>${l.girl ? 'fille' : 'garçon'} · ${l.urban ? 'ville' : 'campagne'}</span></span>
+      <span class="where">${l.c.nom}</span>
+      ${l.q !== null ? `<span class="fam">Famille : ${['20 % les plus pauvres', '60 % aux revenus moyens', '20 % les plus riches'][l.q]}</span>` : ''}
+      ${l.childDeath ? `<span class="life">Meurt avant 5 ans</span>` : `<span>École : ${l.school} an${l.school > 1 ? 's' : ''}${l.works ? ' · travaille enfant' : ''}</span>${l.married ? '<span>Mariée avant 18 ans</span>' : ''}${l.abroad ? `<span>Émigre${l.c.dest ? ' ' + l.c.dest : ''}</span>` : ''}<span>${fmt(l.perDay)} $ par jour</span><span class="life">Vit jusqu’à ${l.deathAge} ans</span>`}
+    </div>`).join('')}</div>
+    <div class="panel" style="background:var(--bg)"><h3>À discuter</h3><ol class="qs">
+      <li>Dans quel continent sont nés la plupart des élèves ? Pourquoi ?</li>
+      <li>Les filles et les garçons, les enfants pauvres et les enfants riches ont-ils les mêmes chances ? Appuie-toi sur les chiffres.</li>
+      <li>Compare l’élève qui a vécu le plus longtemps et celui qui a vécu le moins longtemps. Qu’est-ce qui les sépare ?</li>
+      <li>Pourquoi certains élèves partent-ils vivre à l’étranger ?</li>
+    </ol></div>`;
+}
+
+$('#btn-life').onclick = startLife;
+$('#btn-class').onclick = startClass;
+pins('pins-start', null);
+
+</script>
+
+</body></html>
