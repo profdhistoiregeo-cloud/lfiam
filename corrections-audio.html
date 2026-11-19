@@ -73,7 +73,7 @@ dialog::backdrop{background:rgba(10,20,30,.45)}
 #sheet{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:0;background:#fff}
 .qcard{border:1px dashed #8a97a2;padding:3mm;text-align:center;break-inside:avoid;display:flex;flex-direction:column;align-items:center;gap:1.5mm;color:#000}
 .qcard svg{width:100%;height:auto;display:block}
-.qcard .qn{font-weight:700;font-size:11pt;line-height:1.15}
+.qcard .qn{font-weight:800;font-size:14pt;line-height:1.15}
 .qcard .qd{font-size:7.5pt;color:#333;line-height:1.2}
 @media print{
   @page{margin:10mm}
@@ -2734,7 +2734,7 @@ function ensureSel(){
   const c = cls();
   if(!c || !c.students.find(s=>s.id===S.sel.studentId)) S.sel.studentId = c?.students[0]?.id || null;
 }
-const linkFor = (d, s) => (d && d.links && d.links[s.id]) || s.link || "";
+const linkFor = (d, s) => (d && d.links && d.links[s.id]) || (d && d.folder) || s.link || "";
 
 /* ---------- stockage audio (IndexedDB, repli mémoire) ---------- */
 let db = null; const mem = new Map(); const audioKeys = new Set();
@@ -2866,6 +2866,11 @@ function renderCorrection(){
       ${d?`<button class="btn danger" id="delDevoir">Supprimer ce devoir</button>`:""}
     </div></div>
     ${d?`
+    <div class="card">
+      <label for="folderIn" style="font-weight:600">Lien du dossier Drive de ce devoir (le même pour toute la classe)</label>
+      <input type="url" id="folderIn" style="width:100%;margin-top:6px" value="${esc(d.folder||"")}" placeholder="https://drive.google.com/drive/folders/…">
+      <p class="muted small" style="margin:8px 0 0">Colle-le une seule fois : tous les élèves de la classe l'utilisent pour ce devoir. Chaque QR affiche le nom de l'élève, et son fichier porte aussi son nom dans le dossier.</p>
+    </div>
     <div class="grid2">
       <div class="card">
         <h2>Élèves <span class="muted small">${nAudio}/${c.students.length} corrigés</span></h2>
@@ -2891,6 +2896,11 @@ function renderCorrection(){
   $("#delDevoir").onclick = () => confirmDlg(`Supprimer le devoir « ${d.title} » et ses audios ?`, async()=>{
     for(const x of c.students){ await idb.del(akey(d.id,x.id)); audioKeys.delete(akey(d.id,x.id)); }
     S.devoirs=S.devoirs.filter(z=>z.id!==d.id); S.sel.devoirId=null; save(); render(); });
+  $("#folderIn").onchange = e => {
+    const v=e.target.value.trim();
+    if(v && !isUrl(v)){ toast("Ce n'est pas un lien valide (il doit commencer par https://)."); e.target.value=d.folder||""; return; }
+    if(v) d.folder=v; else delete d.folder; save(); renderCorrection(); toast(v?"Lien du dossier enregistré pour toute la classe.":"Lien du dossier retiré.");
+  };
   $("#bulkDev").onclick = () => bulkLinks("devoir");
   $("#exportZip").onclick = exportZip;
   const ul=$("#stuList");
@@ -2912,9 +2922,9 @@ function panelHtml(c,d,s){
     <div class="row" id="recCtl" hidden style="margin:-4px 0 14px"><button class="btn ghost" id="pauseBtn">Pause</button><button class="btn ghost" id="restartBtn">Recommencer</button></div>
     <div id="player">${has?`<audio id="aud" controls></audio><div class="row" style="margin-top:8px"><button class="btn danger" id="delAudio">Supprimer cet audio</button></div>`:`<p class="muted small" style="margin:0">Pas encore d'audio pour cet élève. Espace : démarrer ou arrêter. P : pause. Flèches haut et bas : changer d'élève.</p>`}</div>
     <div class="linkbox">
-      <label for="linkIn" style="font-weight:600">Lien Drive de cette correction</label>
-      <input type="url" id="linkIn" value="${esc(own)}" placeholder="${esc(s.link? "Lien permanent utilisé : "+s.link : "https://drive.google.com/…")}">
-      <span class="small ${l?"":"muted"}">${l? (own?"Lien propre à ce devoir.":"Lien permanent de l'élève utilisé.") : "Sans lien, l'élève n'aura pas de QR code sur la planche."}</span>
+      <label for="linkIn" style="font-weight:600">Lien propre à cet élève (facultatif)</label>
+      <input type="url" id="linkIn" value="${esc(own)}" placeholder="${esc(d.folder? "Vide : le lien du dossier est utilisé" : (s.link? "Lien permanent utilisé : "+s.link : "https://drive.google.com/…"))}">
+      <span class="small ${l?"":"muted"}">${l? (own?"Lien propre à cet élève pour ce devoir.":(d.folder?"Lien du dossier du devoir utilisé.":"Lien permanent de l'élève utilisé.")) : "Sans lien, l'élève n'aura pas de QR code sur la planche."}</span>
     </div>
     <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="auto" ${S.auto?"checked":""}> Passer à l'élève suivant après chaque enregistrement</label>`;
 }
@@ -3052,8 +3062,8 @@ function renderSheet(){
       <label>QR par ligne<select id="cols">${[3,4,5,6].map(n=>`<option ${n===S.cols?"selected":""}>${n}</option>`).join("")}</select></label>
       <button class="btn" id="print" ${withLink.length?"":"disabled"}>Imprimer la planche</button>
     </div>
-    <p class="small ${without.length?"":"muted"}" style="margin:12px 0 0">${withLink.length} QR code(s) sur ${c.students.length} élèves.${without.length?` Sans lien : ${without.map(s=>esc(s.name)).join(", ")}.`:""}</p></div>
-    <div class="card"><div id="sheet" style="--cols:${S.cols}">${withLink.map(s=>`<div class="qcard">${qrSvg(linkFor(d,s))}<div class="qn">${esc(s.name)}</div><div class="qd">${esc(d.title)}<br>Scanne pour écouter ta correction</div></div>`).join("")||"<p class='muted'>Aucun lien enregistré pour ce devoir.</p>"}</div></div>
+    <p class="small ${without.length?"":"muted"}" style="margin:12px 0 0">${withLink.length} QR code(s) sur ${c.students.length} élèves.${without.length?` Sans lien : ${without.map(s=>esc(s.name)).join(", ")}.`:""}${withLink.length>1&&new Set(withLink.map(s=>linkFor(d,s))).size===1?" Tous les QR ouvrent le même dossier : le nom imprimé permet à chaque élève de retrouver son fichier.":""}</p></div>
+    <div class="card"><div id="sheet" style="--cols:${S.cols}">${withLink.map(s=>`<div class="qcard">${qrSvg(linkFor(d,s))}<div class="qn">${esc(s.name)}</div><div class="qd">${esc(c.name)} · ${esc(d.title)}<br>Scanne pour écouter ta correction</div></div>`).join("")||"<p class='muted'>Aucun lien enregistré pour ce devoir.</p>"}</div></div>
   </div>`;
   $("#selClass").onchange=e=>{S.sel.classId=e.target.value;S.sel.devoirId=null;save();render()};
   $("#selDevoir").onchange=e=>{S.sel.devoirId=e.target.value;save();render()};
