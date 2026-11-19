@@ -14,6 +14,7 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;color-scheme:light}
+[hidden]{display:none!important}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid #5aa9a4;outline-offset:2px}
@@ -2908,7 +2909,8 @@ function panelHtml(c,d,s){
       <button class="recbtn" id="recBtn" aria-label="Enregistrer">${has?"Refaire":"Enregistrer"}</button>
       <div><div class="timer" id="timer">00:00</div><div class="meter" aria-hidden="true"><i id="lvl"></i></div></div>
     </div>
-    <div id="player">${has?`<audio id="aud" controls></audio><div class="row" style="margin-top:8px"><button class="btn danger" id="delAudio">Supprimer cet audio</button></div>`:`<p class="muted small" style="margin:0">Pas encore d'audio pour cet élève. Barre d'espace : démarrer ou arrêter. Flèches haut et bas : changer d'élève.</p>`}</div>
+    <div class="row" id="recCtl" hidden style="margin:-4px 0 14px"><button class="btn ghost" id="pauseBtn">Pause</button><button class="btn ghost" id="restartBtn">Recommencer</button></div>
+    <div id="player">${has?`<audio id="aud" controls></audio><div class="row" style="margin-top:8px"><button class="btn danger" id="delAudio">Supprimer cet audio</button></div>`:`<p class="muted small" style="margin:0">Pas encore d'audio pour cet élève. Espace : démarrer ou arrêter. P : pause. Flèches haut et bas : changer d'élève.</p>`}</div>
     <div class="linkbox">
       <label for="linkIn" style="font-weight:600">Lien Drive de cette correction</label>
       <input type="url" id="linkIn" value="${esc(own)}" placeholder="${esc(s.link? "Lien permanent utilisé : "+s.link : "https://drive.google.com/…")}">
@@ -2919,6 +2921,8 @@ function panelHtml(c,d,s){
 async function bindPanel(){
   const c=cls(), d=dev(), s=stu(); if(!s||!d) return;
   $("#recBtn").onclick = toggleRec;
+  $("#pauseBtn").onclick = togglePause;
+  $("#restartBtn").onclick = restartRec;
   $("#auto").onchange = e => { S.auto=e.target.checked; save(); };
   $("#linkIn").onchange = e => {
     const v=e.target.value.trim(); d.links=d.links||{};
@@ -2939,19 +2943,37 @@ async function startRec(){
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
   catch(e){ toast("Micro inaccessible. Autorise-le dans la barre d'adresse du navigateur."); return; }
   const mime=pickMime(); const mr=new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
-  const r={mr,stream,chunks:[],t0:Date.now(),key:akey(d.id,s.id),sid:s.id};
+  const r={mr,stream,chunks:[],acc:0,seg:Date.now(),discard:false,key:akey(d.id,s.id),sid:s.id};
   mr.ondataavailable=e=>{ if(e.data.size) r.chunks.push(e.data) };
   mr.onstop=()=>finishRec(r);
   try{ r.ctx=new (window.AudioContext||window.webkitAudioContext)(); const an=r.ctx.createAnalyser(); an.fftSize=512; r.ctx.createMediaStreamSource(stream).connect(an);
     const buf=new Uint8Array(an.fftSize); const lv=()=>{ an.getByteTimeDomainData(buf); let m=0; for(const x of buf) m=Math.max(m,Math.abs(x-128)); const el=$("#lvl"); if(el) el.style.width=Math.min(100,m/90*100)+"%"; r.raf=requestAnimationFrame(lv); }; lv(); }catch(_){}
   rec=r; mr.start(250);
-  const b=$("#recBtn"); b.textContent="Arrêter"; b.classList.add("live"); b.setAttribute("aria-label","Arrêter l'enregistrement");
-  r.tick=setInterval(()=>{ const t=$("#timer"); if(t) t.textContent=fmtTime((Date.now()-r.t0)/1000); },250);
+  recUi();
+  r.tick=setInterval(()=>{ const t=$("#timer"); if(t) t.textContent=fmtTime(elapsed(r)); },250);
 }
-function stopRec(){ if(rec && rec.mr.state!=="inactive") rec.mr.stop(); }
+const elapsed = r => (r.acc + (r.seg ? Date.now()-r.seg : 0))/1000;
+function recUi(){
+  if(!rec) return; const paused=rec.mr.state==="paused";
+  const b=$("#recBtn"); if(b){ b.textContent="Arrêter"; b.classList.toggle("live",!paused); b.setAttribute("aria-label","Arrêter et enregistrer"); }
+  const p=$("#pauseBtn"); if(p) p.textContent=paused?"Reprendre":"Pause";
+  const c=$("#recCtl"); if(c) c.hidden=false;
+  const t=$("#timer"); if(t) t.style.opacity=paused?".5":"1";
+}
+function togglePause(){
+  if(!rec) return; const r=rec;
+  if(r.mr.state==="recording"){ r.mr.pause(); r.acc+=Date.now()-r.seg; r.seg=null; }
+  else if(r.mr.state==="paused"){ r.mr.resume(); r.seg=Date.now(); }
+  recUi();
+}
+function restartRec(){ if(!rec) return; rec.discard=true; stopRec(); }
+function stopRec(){
+  if(rec && rec.mr.state!=="inactive"){ if(rec.seg){ rec.acc+=Date.now()-rec.seg; rec.seg=null; } rec.mr.stop(); }
+}
 async function finishRec(r){
   clearInterval(r.tick); cancelAnimationFrame(r.raf); r.stream.getTracks().forEach(t=>t.stop()); try{r.ctx.close()}catch(_){}
-  const dur=(Date.now()-r.t0)/1000; const type=r.mr.mimeType||"audio/webm";
+  if(r.discard){ rec=null; const t=$("#timer"); if(t) t.textContent="00:00"; toast("Reprise depuis le début."); await startRec(); return; }
+  const dur=r.acc/1000; const type=r.mr.mimeType||"audio/webm";
   const blob=new Blob(r.chunks,{type});
   rec=null;
   if(blob.size<500){ toast("Enregistrement vide, réessaie."); renderCorrection(); return; }
@@ -2964,6 +2986,7 @@ document.addEventListener("keydown", e=>{
   if(S.view!=="correction"||$("#dlg").open) return;
   const tag=e.target.tagName; if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT") return;
   if(e.code==="Space"){ e.preventDefault(); if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); toggleRec(); }
+  else if(e.code==="KeyP"&&rec){ e.preventDefault(); togglePause(); }
   else if((e.key==="ArrowDown"||e.key==="ArrowUp")&&!rec){ const c=cls(); if(!c) return; e.preventDefault(); const i=c.students.findIndex(x=>x.id===S.sel.studentId); const j=Math.max(0,Math.min(c.students.length-1,i+(e.key==="ArrowDown"?1:-1))); if(c.students[j]&&j!==i) pickStudent(c.students[j].id); }
 });
 
