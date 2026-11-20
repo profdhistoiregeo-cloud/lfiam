@@ -125,9 +125,10 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px 16px 4
     <nav id="nav">
       <button data-s="home" class="active">Accueil</button>
       <button data-s="explore">Explorer</button>
-      <button data-s="projet">Mon projet</button>
+      <button data-s="projet">Mon métier</button>
       <button data-s="compare">Comparer</button>
       <button data-s="specs">Spécialités</button>
+      <button data-s="maroc">Au Maroc</button>
       <button data-s="tests">Tests &amp; quiz</button>
       <button data-s="reperes">Repères</button>
       <button data-s="fiche">Ma fiche</button>
@@ -153,7 +154,8 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px 16px 4
   <h2>Ce que tu peux faire ici</h2>
   <div class="grid g3">
     <button class="card click" data-s="explore"><h3>🧭 Explorer</h3><p>Choisis ta combinaison et vois les 14 domaines d'études classés du plus au moins adapté.</p></button>
-    <button class="card click" data-s="projet"><h3>🎯 Mon projet</h3><p>Pars d'une formation ou d'un métier : on te propose les combinaisons les plus cohérentes.</p></button>
+    <button class="card click" data-s="projet"><h3>🎯 Mon métier</h3><p>Tape un métier parmi plus de 200 : tu obtiens les spécialités conseillées, les combinaisons cohérentes et les formations en France et au Maroc.</p></button>
+    <button class="card click" data-s="maroc"><h3>🇲🇦 Au Maroc</h3><p>Les filières post-bac au Maroc (facultés, écoles, prépas, privé) : accès, villes et spécialités utiles.</p></button>
     <button class="card click" data-s="compare"><h3>⚖️ Comparer</h3><p>Mets deux combinaisons côte à côte pour voir ce qui change.</p></button>
     <button class="card click" data-s="tests"><h3>🧩 Tests &amp; quiz</h3><p>Deux tests de personnalité et un quiz sur les idées reçues.</p></button>
     <button class="card click" data-s="reperes"><h3>📅 Repères</h3><p>Le calendrier de l'orientation, et où poursuivre ses études : France, Maroc, international.</p></button>
@@ -178,10 +180,15 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px 16px 4
 
 <!-- PROJET -->
 <section id="projet">
-  <h1>J'ai une idée de formation ou de métier</h1>
-  <p class="lead">Choisis un projet : la page t'indique les spécialités conseillées et les combinaisons les plus cohérentes parmi celles proposées dans l'établissement sélectionné.</p>
+  <h1>Quel métier t'attire ?</h1>
+  <p class="lead">Tape un métier, même approximativement (« kiné », « avocate », « jeux vidéo »…) : la page t'indique les spécialités conseillées, les combinaisons cohérentes dans ton établissement et où te former.</p>
   <p class="lyc-banner lycLbl"></p>
-  <select id="projSel" style="max-width:100%;min-width:280px"></select>
+  <div class="card">
+    <label class="f" for="metierQ" style="margin-top:0">🔎 Rechercher un métier ou une formation</label>
+    <input type="text" id="metierQ" placeholder="ex. kiné, avocate, pilote, styliste, jeux vidéo…" autocomplete="off">
+    <div id="metierSug" class="chips" style="margin-top:10px"></div>
+    <details style="margin-top:12px"><summary>Ou parcourir tous les parcours par domaine</summary><div id="projBrowse"></div></details>
+  </div>
   <div id="projOut" style="margin-top:16px"></div>
 </section>
 
@@ -217,6 +224,21 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px 16px 4
     </div>
   </div>
   <div id="testRun" style="display:none"></div>
+</section>
+
+<!-- MAROC -->
+<section id="maroc">
+  <h1>🇲🇦 Étudier au Maroc après le bac</h1>
+  <p class="lead">Les grandes voies post-bac au Maroc et les spécialités utiles pour y accéder. Les conditions et les dates changent chaque année : vérifie toujours sur les sites officiels et auprès du service d'orientation du lycée.</p>
+  <div class="grid g3" id="maIntro"></div>
+  <h2>Les filières</h2>
+  <div class="row noprint">
+    <input type="text" id="maQ" placeholder="Rechercher : médecine, ENSA, journalisme…" style="max-width:300px">
+    <select id="maDom"></select><select id="maType"></select>
+    <button class="btn ghost small" data-act="print" data-sec="maroc">🖨 Imprimer</button>
+  </div>
+  <p id="maCount" class="lyc-banner" style="margin-top:10px"></p>
+  <div class="grid g2" id="maList"></div>
 </section>
 
 <!-- REPERES -->
@@ -471,38 +493,322 @@ const QUIZ = [
   {s:"Choisir uniquement les spécialités où l'on a les meilleures notes est toujours la meilleure stratégie.",a:false,e:"Les notes comptent, mais l'intérêt pour la matière et le projet d'études comptent tout autant : on réussit mieux ce qui nous motive."}
 ];
 
-/* Mon projet : c = conseillées (a|b = l'une ou l'autre), u = utiles */
+/* Parcours : c = conseillées (a|b = l'une ou l'autre), u = utiles, ma = filières au Maroc. Les 30 premiers gardent leur ordre (compatibilité des codes élèves). */
 const PROJETS = [
-  {n:"Médecine, pharmacie, maïeutique, kiné (PASS / L.AS)",d:"sante",c:["svt","pc"],u:["maths"],note:"Aucune spécialité n'est obligatoire, mais la première année est très scientifique. Garder des maths (spécialité ou Maths complémentaires) est utile."},
-  {n:"Soins infirmiers (IFSI)",d:"sante",c:["svt"],u:["ses","pc","maths"],note:"Profils variés acceptés ; motivation, sens du contact et rigueur comptent beaucoup."},
-  {n:"Vétérinaire, agronomie",d:"envi",c:["svt","pc"],u:["maths","bioeco"],note:"Formations très sélectives : un bon niveau scientifique général est attendu."},
-  {n:"Biologie, recherche en sciences du vivant",d:"sci",c:["svt","pc|maths"],u:["maths","pc"],note:""},
-  {n:"Environnement, géologie, climat",d:"envi",c:["svt"],u:["pc","hggsp","maths"],note:""},
-  {n:"Chimie",d:"sci",c:["pc","maths"],u:["svt"],note:""},
-  {n:"Prépa scientifique (MPSI, PCSI, MP2I…)",d:"sci",c:["maths","pc|nsi|si"],u:["pc","si","nsi"],note:"Maths avec l'option Maths expertes est quasiment indispensable. MP2I : Maths et NSI ; PTSI : Maths et SI ou PC."},
-  {n:"École d'ingénieurs post-bac",d:"inge",c:["maths","pc|si"],u:["si","nsi","pc"],note:"Maths expertes est un atout important."},
-  {n:"Aéronautique, spatial, pilote",d:"inge",c:["maths","pc"],u:["si"],note:""},
-  {n:"Informatique, cybersécurité (licence, BUT)",d:"info",c:["maths","nsi"],u:["si","pc"],note:"Les maths sont souvent plus déterminantes que NSI."},
-  {n:"Data science, intelligence artificielle",d:"info",c:["maths","nsi"],u:["ses"],note:"Maths expertes recommandée."},
-  {n:"Jeux vidéo",d:"info",c:["nsi","maths|artspla"],u:["artspla","cav","maths"],note:"Côté programmation : Maths et NSI. Côté graphisme : Arts plastiques et un portfolio."},
-  {n:"Architecture",d:"archi",c:["maths|artspla"],u:["artspla","maths","pc","si","hggsp"],note:"Les ENSA recrutent des profils variés ; un intérêt démontré pour l'architecture et les arts compte beaucoup."},
-  {n:"Design, écoles d'art, DN MADE",d:"arts",c:["artspla"],u:["cav","hlp","arts"],note:"Un portfolio de travaux personnels est souvent demandé."},
-  {n:"Cinéma, audiovisuel",d:"arts",c:["cav"],u:["hlp","artspla","llcer"],note:"Les écoles sont très sélectives : montre tes réalisations personnelles."},
-  {n:"Journalisme, communication",d:"com",c:["hggsp","hlp|ses"],u:["ses","amc","llcer","cav"],note:"Les écoles de journalisme recrutent souvent après une licence ; la culture générale compte beaucoup."},
-  {n:"Sciences Po (IEP)",d:"droit",c:["hggsp","ses|hlp"],u:["amc","llcer","maths"],note:"Garder des mathématiques peut être un plus pour certains IEP."},
-  {n:"Droit",d:"droit",c:["hggsp|ses"],u:["ses","hlp","amc","hggsp"],note:"Aucune spécialité n'est exigée ; l'expression écrite est essentielle."},
-  {n:"Relations internationales, diplomatie",d:"intl",c:["hggsp","amc|llcer"],u:["ses","llcer","amc"],note:""},
-  {n:"LEA, commerce international",d:"intl",c:["amc|llcer"],u:["ses","hggsp","llcer"],note:"Deux langues étrangères bien maîtrisées sont attendues."},
-  {n:"Économie (licence)",d:"eco",c:["ses","maths"],u:["hggsp"],note:"Les maths sont très présentes dès la première année."},
-  {n:"Prépa économique (ECG)",d:"eco",c:["maths"],u:["ses","hggsp","amc"],note:"Il faut des mathématiques en Terminale : spécialité Maths ou Maths complémentaires selon la voie choisie."},
-  {n:"École de commerce post-bac",d:"eco",c:["ses|maths"],u:["amc","maths","hggsp","llcer"],note:"Langues, engagement et expériences personnelles sont valorisés."},
-  {n:"Lettres, prépa littéraire",d:"lettres",c:["hlp"],u:["llca","hggsp","llcer"],note:""},
-  {n:"Histoire, géographie, archéologie",d:"shs",c:["hggsp"],u:["hlp","llca","svt","ses"],note:""},
-  {n:"Psychologie",d:"shs",c:["ses|svt"],u:["maths","hlp","svt"],note:"La licence comporte beaucoup de statistiques et de biologie : Maths complémentaires est utile."},
-  {n:"Sociologie, sciences sociales",d:"shs",c:["ses"],u:["hggsp","maths","hlp"],note:""},
-  {n:"Professeur·e des écoles",d:"shs",c:["hlp|ses|hggsp"],u:["maths","svt","hlp"],note:"Métier polyvalent : garder un équilibre entre matières littéraires et scientifiques est un atout."},
-  {n:"Traduction, enseignement des langues",d:"lettres",c:["llcer|amc"],u:["hlp","llcer","amc"],note:""},
-  {n:"STAPS, métiers du sport",d:"sport",c:["svt"],u:["eppcs","pc","ses"],note:"EPPCS est un plus là où elle existe ; SVT aide pour la physiologie."}
+  {id:"med",n:"Médecine, pharmacie, dentaire, maïeutique, kiné",d:"sante",c:["svt","pc"],u:["maths"],ma:["fmp","um6ss","ispits"],note:"En France (PASS ou L.AS), aucune spécialité n'est obligatoire, mais la première année est très scientifique. Au Maroc, les facultés de médecine et de pharmacie recrutent par concours : présélection sur les notes, puis épreuve écrite. Garder des maths est utile."},
+  {id:"ifsi",n:"Soins infirmiers",d:"sante",c:["svt"],u:["ses","pc","maths"],ma:["ispits","um6ss"],note:"En France, les IFSI recrutent sur Parcoursup ; au Maroc, les ISPITS recrutent par concours. Les profils sont variés : motivation, sens du contact et rigueur comptent beaucoup."},
+  {id:"veto",n:"Vétérinaire, agronomie",d:"envi",c:["svt","pc"],u:["maths","bioeco"],ma:["iav","um6p"],note:"Ce sont des formations très sélectives : un bon niveau scientifique général est attendu."},
+  {id:"bio",n:"Biologie, recherche en sciences du vivant",d:"sci",c:["svt","pc|maths"],u:["maths","pc"],ma:["fs","fst","um6p"],note:""},
+  {id:"envi",n:"Environnement, géologie, climat",d:"envi",c:["svt"],u:["pc","hggsp","maths"],ma:["fs","fst","iav"],note:""},
+  {id:"chimie",n:"Chimie",d:"sci",c:["pc","maths"],u:["svt"],ma:["fs","fst","est","ensa"],note:""},
+  {id:"prepasci",n:"Prépa scientifique (MPSI, PCSI, MP2I…)",d:"sci",c:["maths","pc|nsi|si"],u:["pc","si","nsi"],ma:["cpge","cpgefr","gecole"],note:"Maths, avec l'option Maths expertes, est quasiment indispensable. MP2I : Maths et NSI ; PTSI : Maths et SI ou PC."},
+  {id:"inge",n:"École d'ingénieurs post-bac",d:"inge",c:["maths","pc|si"],u:["si","nsi","pc"],ma:["ensa","ensam","cpge","gecole","centrale","uemf","um6p","uir"],note:"L'option Maths expertes est un atout important."},
+  {id:"aero",n:"Aéronautique, spatial, pilote",d:"inge",c:["maths","pc"],u:["si"],ma:["ensa","ensam","mil","ofppt"],note:"Pilote de ligne : formation en école de pilotage (souvent après une prépa ou un diplôme d'ingénieur), avec une visite médicale d'aptitude."},
+  {id:"info",n:"Informatique, cybersécurité (licence, BUT)",d:"info",c:["maths","nsi"],u:["si","pc"],ma:["ensa","est","fst","fs","ofppt","um6p","aui"],note:"Les maths sont souvent plus déterminantes que NSI."},
+  {id:"data",n:"Data science, intelligence artificielle",d:"info",c:["maths","nsi"],u:["ses"],ma:["ensa","cpge","gecole","um6p","fst"],note:"L'option Maths expertes est recommandée."},
+  {id:"jeux",n:"Jeux vidéo",d:"info",c:["nsi","maths|artspla"],u:["artspla","cav","maths"],ma:["est","ofppt","ensa","priv"],note:"Côté programmation : Maths et NSI. Côté graphisme : Arts plastiques et un portfolio."},
+  {id:"archi",n:"Architecture",d:"archi",c:["maths|artspla"],u:["artspla","maths","pc","si","hggsp"],ma:["ena","uir","uemf"],note:"Les écoles recrutent des profils variés ; un intérêt démontré pour l'architecture et les arts compte beaucoup."},
+  {id:"design",n:"Design, graphisme, écoles d'art",d:"arts",c:["artspla"],u:["cav","hlp","arts"],ma:["inba","ofppt","priv"],note:"Un portfolio de travaux personnels est souvent demandé."},
+  {id:"cinema",n:"Cinéma, audiovisuel, théâtre",d:"arts",c:["cav"],u:["hlp","artspla","llcer"],ma:["ismac","isadac"],note:"Les écoles sont très sélectives : montre tes réalisations personnelles."},
+  {id:"journa",n:"Journalisme, communication",d:"com",c:["hggsp","hlp|ses"],u:["ses","amc","llcer","cav"],ma:["isic","flsh","uir"],note:"En France, les écoles de journalisme recrutent souvent après une licence ; la culture générale compte beaucoup."},
+  {id:"iep",n:"Sciences Po, science politique",d:"droit",c:["hggsp","ses|hlp"],u:["amc","llcer","maths"],ma:["uir","fsjes","aui","um6p"],note:"Garder des mathématiques peut être un plus pour certains IEP."},
+  {id:"droit",n:"Droit",d:"droit",c:["hggsp|ses"],u:["ses","hlp","amc","hggsp"],ma:["fsjes","uir"],note:"Aucune spécialité n'est exigée ; l'expression écrite est essentielle."},
+  {id:"rel",n:"Relations internationales, diplomatie",d:"intl",c:["hggsp","amc|llcer"],u:["ses","llcer","amc"],ma:["uir","fsjes","aui","flsh"],note:""},
+  {id:"lea",n:"Langues étrangères appliquées, commerce international",d:"intl",c:["amc|llcer"],u:["ses","hggsp","llcer"],ma:["flsh","encg","isit"],note:"Deux langues étrangères bien maîtrisées sont attendues."},
+  {id:"econ",n:"Économie (licence)",d:"eco",c:["ses","maths"],u:["hggsp"],ma:["fsjes","um6p","aui"],note:"Les maths sont très présentes dès la première année."},
+  {id:"ecg",n:"Prépa économique (ECG)",d:"eco",c:["maths"],u:["ses","hggsp","amc"],ma:["cpgefr","cpge","iscae","encg"],note:"Il faut des mathématiques en Terminale : spécialité Maths ou Maths complémentaires selon la voie choisie."},
+  {id:"commerce",n:"École de commerce, entrepreneuriat",d:"eco",c:["ses|maths"],u:["amc","maths","hggsp","llcer"],ma:["encg","essec","tbs","efa","aui","priv"],note:"Langues, engagement et expériences personnelles sont valorisés."},
+  {id:"lettres",n:"Lettres, édition, prépa littéraire",d:"lettres",c:["hlp"],u:["llca","hggsp","llcer"],ma:["flsh","ens"],note:""},
+  {id:"histoire",n:"Histoire, géographie, archéologie, patrimoine",d:"shs",c:["hggsp"],u:["hlp","llca","svt","ses"],ma:["flsh"],note:""},
+  {id:"psy",n:"Psychologie",d:"shs",c:["ses|svt"],u:["maths","hlp","svt"],ma:["flsh"],note:"La licence comporte beaucoup de statistiques et de biologie : l'option Maths complémentaires est utile."},
+  {id:"socio",n:"Sociologie, sciences sociales",d:"shs",c:["ses"],u:["hggsp","maths","hlp"],ma:["flsh","um6p"],note:""},
+  {id:"pe",n:"Professeur·e des écoles",d:"shs",c:["hlp|ses|hggsp"],u:["maths","svt","hlp"],ma:["ens"],note:"C'est un métier polyvalent : garder un équilibre entre matières littéraires et scientifiques est un atout."},
+  {id:"trad",n:"Traduction, interprétariat, enseignement des langues",d:"lettres",c:["llcer|amc"],u:["hlp","llcer","amc"],ma:["flsh"],note:""},
+  {id:"staps",n:"STAPS, métiers du sport",d:"sport",c:["svt"],u:["eppcs","pc","ses"],ma:["ens","fs"],note:"EPPCS est un plus là où elle existe ; SVT aide pour la physiologie. Au Maroc, renseigne-toi sur les licences en sciences du sport et en éducation physique."},
+  /* --- nouveaux parcours --- */
+  {id:"polic",n:"Police, gendarmerie, armée, sécurité civile",d:"droit",c:["hggsp|ses"],u:["eppcs","svt","amc"],ma:["mil","fsjes"],note:"On y entre par concours, après le bac ou après une licence selon le grade. La condition physique compte, et la nationalité du pays est exigée."},
+  {id:"polsci",n:"Police scientifique, criminologie",d:"sci",c:["svt|pc"],u:["hggsp","ses","maths"],ma:["fs","fsjes","mil"],note:"Le volet technique passe par la chimie ou la biologie ; la criminologie se fait souvent après une licence de droit ou de psychologie."},
+  {id:"hotel",n:"Hôtellerie, restauration, cuisine",d:"intl",c:["amc|llcer"],u:["ses","svt"],ma:["isit","ofppt","priv"],note:"Ces métiers sont accessibles avec tous les profils (BTS, bachelors, écoles hôtelières). Les langues et les stages sont des atouts majeurs."},
+  {id:"tour",n:"Tourisme, guide, voyage",d:"intl",c:["amc|llcer"],u:["hggsp","ses"],ma:["isit","flsh","ofppt"],note:""},
+  {id:"pnc",n:"Personnel navigant, métiers de l'aéroport",d:"intl",c:["amc|llcer"],u:["svt","eppcs","ses"],ma:["ofppt","priv"],note:"L'anglais courant est indispensable ; une certification (CCA en France) est requise pour les hôtesses et stewards."},
+  {id:"huma",n:"Humanitaire, ONG, développement",d:"intl",c:["hggsp","amc|llcer|ses"],u:["svt","ses"],ma:["fsjes","flsh","uir","aui"],note:"On y entre souvent après une formation (droit, santé, logistique, sciences politiques) et des expériences de bénévolat."},
+  {id:"admin",n:"Fonction publique, administration",d:"droit",c:["hggsp|ses"],u:["hlp","maths"],ma:["fsjes","flsh"],note:"Les concours se passent souvent après une licence ou un master."},
+  {id:"mode",n:"Mode, stylisme, textile",d:"arts",c:["artspla"],u:["cav","ses"],ma:["ofppt","priv"],note:"Un portfolio est demandé ; le volet commercial de la mode passe aussi par les écoles de commerce."},
+  {id:"musique",n:"Musique, son, danse",d:"arts",c:["arts|cav"],u:["pc","nsi","hlp"],ma:["ismac","priv"],note:"La pratique au conservatoire se mène en parallèle. Ingénieur·e du son : Maths et Physique-chimie sont utiles."},
+  {id:"photo",n:"Photographie, vidéo, animation 3D",d:"arts",c:["artspla|cav"],u:["nsi","cav","artspla"],ma:["ismac","inba","ofppt","priv"],note:"Montre tes réalisations : un portfolio ou une chaîne vidéo comptent."},
+  {id:"btp",n:"Bâtiment, travaux publics, génie civil",d:"inge",c:["maths","pc|si"],u:["si"],ma:["ensa","gecole","est","bts","ofppt"],note:""},
+  {id:"energie",n:"Énergie, électricité, énergies renouvelables",d:"inge",c:["maths","pc|si"],u:["si","nsi"],ma:["ensa","ensam","est","um6p","ofppt"],note:""},
+  {id:"auto",n:"Automobile, mécanique, maintenance",d:"inge",c:["si|pc"],u:["maths"],ma:["ensam","est","ofppt","bts"],note:"Les BTS et BUT sont accessibles avec des profils variés ; pour devenir ingénieur·e, il faut des maths."},
+  {id:"logist",n:"Logistique, transport, douane, marine marchande",d:"eco",c:["maths|ses"],u:["ses","amc","si"],ma:["encg","est","ofppt","ensa"],note:""},
+  {id:"compta",n:"Comptabilité, audit, banque, finance, assurance",d:"eco",c:["maths|ses"],u:["ses","maths","amc"],ma:["encg","fsjes","iscae","est","bts"],note:"La finance de marché demande un très bon niveau en mathématiques (Maths expertes conseillée)."},
+  {id:"marketing",n:"Marketing, publicité, réseaux sociaux, événementiel",d:"eco",c:["ses"],u:["amc","artspla","cav","hlp","maths"],ma:["encg","isic","est","priv"],note:""},
+  {id:"rh",n:"Ressources humaines, management",d:"eco",c:["ses"],u:["hlp","maths","amc"],ma:["encg","fsjes","est"],note:""},
+  {id:"immo",n:"Commerce, vente, immobilier",d:"eco",c:["ses"],u:["amc","maths"],ma:["encg","est","ofppt","bts"],note:"Ces métiers sont accessibles avec des profils variés : le sens du contact compte beaucoup."},
+  {id:"social",n:"Travail social, éducation spécialisée, petite enfance",d:"shs",c:["ses|hggsp|hlp"],u:["svt","hlp"],ma:["inas","flsh","ens"],note:"Les stages et le bénévolat sont valorisés."},
+  {id:"prof",n:"Professeur·e en collège ou lycée",d:"shs",c:[],u:[],ma:["ens","flsh","fs"],noCombo:true,note:"Choisis la spécialité de la matière que tu veux enseigner (HGGSP pour l'histoire-géographie, Maths, SVT, AMC ou LLCER pour l'anglais…), puis une licence dans cette matière."},
+  {id:"paramed",n:"Orthophonie, ergothérapie, psychomotricité, diététique",d:"sante",c:["svt"],u:["pc","hlp","ses","maths"],ma:["ispits","um6ss"],note:"L'orthophonie demande aussi une excellente maîtrise du français."},
+  {id:"optic",n:"Imagerie, laboratoire, optique, appareillage",d:"sante",c:["svt|pc"],u:["maths"],ma:["ispits","um6ss"],note:""},
+  {id:"esthe",n:"Esthétique, cosmétique, parfumerie, coiffure",d:"sante",c:["svt|pc"],u:["artspla","ses"],ma:["ofppt","priv","fs"],note:"Les BTS sont accessibles avec tous les profils ; la formulation de cosmétiques et de parfums demande de la chimie."},
+  {id:"agri",n:"Agriculture, élevage, soin des animaux",d:"envi",c:["svt"],u:["pc","bioeco","ses"],ma:["iav","fst","ofppt"],note:""},
+  {id:"ocean",n:"Océanographie, biologie marine",d:"sci",c:["svt","pc|maths"],u:["maths","pc"],ma:["fs","iav"],note:""},
+  {id:"astro",n:"Astrophysique, espace",d:"sci",c:["maths","pc"],u:["nsi"],ma:["fs","cpge"],note:"Ce sont des études longues (master, doctorat) ; Maths expertes conseillée."},
+  {id:"web",n:"Développement web, UX design",d:"info",c:["nsi"],u:["maths","artspla"],ma:["est","ofppt","fst","priv"],note:""},
+  {id:"urba",n:"Urbanisme, aménagement du territoire",d:"archi",c:["hggsp"],u:["ses","maths","artspla"],ma:["ena","flsh","inau"],note:"On s'y spécialise souvent après une licence de géographie, d'architecture ou de sciences politiques."}
+];
+
+/* Métiers : Nom | parcours | synonymes (séparés par des virgules) */
+const METIERS_RAW = `
+Médecin|med|docteur,généraliste,médecine
+Chirurgien·ne|med|chirurgie,chirurgienne
+Pédiatre|med|médecin des enfants
+Cardiologue|med|coeur
+Dermatologue|med|peau
+Psychiatre|med|
+Gynécologue|med|
+Ophtalmologue|med|yeux
+Anesthésiste-réanimateur·rice|med|anesthésie
+Radiologue|med|
+Médecin urgentiste|med|urgences,samu
+Médecin légiste|polsci|légiste,autopsie
+Chirurgien·ne-dentiste|med|dentiste,dents
+Orthodontiste|med|appareil dentaire
+Pharmacien·ne|med|pharmacie,médicaments,pharmacienne
+Sage-femme|med|maïeuticien,accouchement,maïeutique,sagefemme
+Kinésithérapeute|med|kiné,kinésithérapie,rééducation,kine
+Kinésithérapeute du sport|med|kiné sportif
+Infirmier·ère|ifsi|infirmière,soignant,soins,infirmier
+Infirmier·ère anesthésiste|ifsi|IADE
+Infirmier·ère de bloc opératoire|ifsi|IBODE
+Puériculteur·rice|ifsi|bébés,puéricultrice
+Aide-soignant·e|ifsi|
+Ambulancier·ère|ifsi|ambulance
+Manipulateur·rice en radiologie|optic|radio,imagerie médicale,manipulateur radio
+Technicien·ne de laboratoire médical|optic|laborantin,analyses médicales,biologie médicale
+Opticien·ne|optic|lunettes,lentilles
+Audioprothésiste|optic|appareil auditif,audition
+Prothésiste dentaire|optic|
+Orthoptiste|paramed|
+Orthophoniste|paramed|langage,parole
+Ergothérapeute|paramed|
+Psychomotricien·ne|paramed|
+Diététicien·ne|paramed|nutritionniste,nutrition,diététique
+Ostéopathe|paramed|ostéopathie
+Podologue|paramed|pieds
+Vétérinaire|veto|animaux,véto,veterinaire
+Auxiliaire vétérinaire|veto|ASV,assistant vétérinaire
+Ingénieur·e agronome|veto|agronomie
+Soigneur·se animalier·ère|agri|zoo,soigneur
+Agriculteur·rice|agri|ferme,exploitant agricole,agricultrice
+Éleveur·se|agri|élevage,chevaux
+Horticulteur·rice|agri|fleurs,plantes,fleuriste
+Paysagiste|envi|jardins,paysage,jardinier
+Biologiste|bio|biologie
+Chercheur·se en biologie|bio|recherche,chercheuse,chercheur
+Généticien·ne|bio|génétique,ADN
+Biotechnologiste|bio|biotechnologie,biotech
+Biologiste marin·e|ocean|mer,océan,marin,dauphins,poissons
+Océanographe|ocean|océanographie
+Géologue|envi|roches,volcans,volcanologue,géologie
+Climatologue|envi|climat,réchauffement climatique
+Météorologue|envi|météo,météorologie
+Ingénieur·e environnement|envi|écologie,développement durable,environnement
+Écologue|envi|biodiversité,nature
+Garde forestier·ère|envi|forêt,forestier
+Chimiste|chimie|chimie
+Ingénieur·e chimiste|chimie|
+Parfumeur·se|esthe|parfum,nez
+Cosmétologue|esthe|cosmétique,cosmétiques
+Esthéticien·ne|esthe|beauté,soins esthétiques,esthéticienne,manucure,ongles
+Maquilleur·se|esthe|maquillage,make-up
+Coiffeur·se|esthe|coiffure,barbier,coiffeuse
+Physicien·ne|prepasci|physique
+Mathématicien·ne|prepasci|mathématiques,maths
+Astrophysicien·ne|astro|astronomie,espace,astronome,étoiles,planètes
+Astronaute|astro|cosmonaute,spationaute
+Statisticien·ne|data|statistiques
+Actuaire|data|
+Data scientist|data|données,data analyst,big data,analyste de données
+Ingénieur·e en intelligence artificielle|data|IA,intelligence artificielle,machine learning
+Développeur·se|info|programmeur,codeur,développeur informatique,coder,programmation,développeuse
+Développeur·se web|web|site internet,front-end,back-end,sites web
+UX/UI designer|web|ergonome,interface,webdesigner,web designer
+Expert·e en cybersécurité|info|hacker éthique,sécurité informatique,hacker,cybersécurité
+Administrateur·rice réseaux|info|réseau,systèmes et réseaux
+Technicien·ne informatique|info|maintenance informatique,dépannage,informaticien
+Ingénieur·e informatique|info|informatique
+Game designer|jeux|jeux vidéo,jeu vidéo,gaming
+Développeur·se de jeux vidéo|jeux|
+Animateur·rice 3D|photo|animation,3D,motion design,dessin animé,graphiste 3D
+Ingénieur·e généraliste|inge|ingénieur,ingénieure
+Ingénieur·e en mécanique|inge|mécanique
+Ingénieur·e en électronique|inge|électronique
+Roboticien·ne|inge|robots,robotique
+Ingénieur·e aéronautique|aero|avions,aéronautique,aérospatial,fusées
+Pilote de ligne|aero|pilote,avion,aviateur,pilote d'avion
+Pilote d'hélicoptère|aero|hélicoptère
+Contrôleur·se aérien·ne|aero|tour de contrôle
+Mécanicien·ne aéronautique|auto|maintenance avion
+Hôtesse de l'air, steward|pnc|hôtesse,steward,PNC,personnel navigant,hotesse de l'air
+Agent·e d'escale|pnc|aéroport
+Ingénieur·e en génie civil|btp|génie civil,ponts,routes
+Architecte|archi|architecture,maisons
+Architecte d'intérieur|design|décoration,décorateur,décoratrice,intérieur
+Urbaniste|urba|urbanisme,ville,aménagement
+Géomètre-topographe|btp|topographie,topographe
+Conducteur·rice de travaux|btp|chantier,BTP,bâtiment
+Électricien·ne|energie|électricité
+Ingénieur·e en énergies renouvelables|energie|solaire,éolien,énergie,énergies
+Mécanicien·ne automobile|auto|garagiste,voitures,mécanique auto,mécanicien
+Ingénieur·e automobile|auto|automobile,formule 1
+Designer automobile|design|
+Logisticien·ne|logist|logistique,supply chain,entrepôt
+Transitaire, déclarant·e en douane|logist|import export,transit
+Capitaine de navire, officier·ère de marine marchande|logist|marin,bateau,capitaine,navire,marine
+Conducteur·rice de train|logist|train,cheminot
+Expert·e-comptable|compta|comptable,comptabilité
+Auditeur·rice|compta|audit
+Banquier·e, conseiller·ère bancaire|compta|banque,banquière
+Trader|compta|bourse,marchés financiers,trading
+Analyste financier·ère|compta|finance,financier
+Conseiller·ère en assurance|compta|assurance,assureur
+Contrôleur·se de gestion|compta|gestion
+Économiste|econ|économie
+Entrepreneur·se, chef·fe d'entreprise|commerce|créer une entreprise,start-up,startup,patron,business,entreprise
+Acheteur·se|commerce|achats
+Commercial·e|immo|vendeur,vente,commerce,commerciale,vendeuse
+Agent·e immobilier·ère|immo|immobilier
+Responsable marketing|marketing|marketing
+Publicitaire|marketing|publicité,pub
+Chef·fe de projet événementiel|marketing|événementiel,évènementiel,évènements,organisateur,wedding planner,mariages
+Community manager|marketing|réseaux sociaux,influenceur,influenceuse,youtubeur,tiktok,instagram,influence
+Responsable des ressources humaines|rh|RH,recrutement,recruteur
+Manager, directeur·rice|rh|management,diriger,directeur,directrice
+Avocat·e|droit|avocat,avocate,défendre
+Juge, magistrat·e|droit|juge,magistrat,procureur,justice,tribunal
+Notaire|droit|
+Commissaire de justice (huissier)|droit|huissier
+Juriste|droit|juridique,droit
+Greffier·ère|droit|
+Policier·ère|polic|police,commissaire,inspecteur,policière,policier
+Gendarme|polic|gendarmerie
+Militaire, officier·ère|polic|armée,soldat,militaire,officier,pilote de chasse
+Sapeur-pompier·ère|polic|pompier,pompière
+Douanier·ère|polic|douane,douanes
+Agent·e de sécurité|polic|vigile
+Détective privé·e|polic|enquêteur,enquête
+Expert·e en police scientifique|polsci|police scientifique,expert scientifique,profiler,profileur,ADN enquête
+Criminologue|polsci|criminologie,crime
+Diplomate|rel|ambassadeur,ambassade,consul,diplomatie
+Chargé·e de relations internationales|rel|relations internationales,ONU,organisations internationales
+Humanitaire|huma|ONG,aide humanitaire,développement,médecins sans frontières
+Fonctionnaire, cadre de l'administration|admin|fonction publique,administration
+Responsable politique|iep|politique,député,ministre,maire,président
+Chargé·e d'études en science politique|iep|sciences po,science politique
+Journaliste|journa|reporter,journalisme,presse,journaliste sportif
+Présentateur·rice TV ou radio|journa|animateur radio,télévision,présentateur,présentatrice,télé
+Chargé·e de communication|journa|communication,relations publiques
+Attaché·e de presse|journa|
+Traducteur·rice|trad|traduction,langues,traductrice
+Interprète|trad|
+Professeur·e de langues|trad|prof d'anglais,prof d'espagnol
+Professeur·e des écoles|pe|instituteur,institutrice,maître,maîtresse,enseignant primaire,école primaire
+Professeur·e en collège ou lycée|prof|enseignant,enseignante,prof,professeur,professeure
+Professeur·e d'EPS|staps|prof de sport
+Conseiller·ère principal·e d'éducation (CPE)|prof|CPE,vie scolaire
+Éducateur·rice de jeunes enfants|social|crèche,petite enfance,nounou
+Éducateur·rice spécialisé·e|social|handicap,éducateur,éducatrice
+Assistant·e social·e|social|social,assistante sociale
+Animateur·rice socioculturel·le|social|animation,colonie,animateur
+Psychologue|psy|psychologie,psy,thérapeute
+Neuropsychologue|psy|neurosciences,cerveau
+Sociologue|socio|sociologie
+Historien·ne|histoire|histoire
+Archéologue|histoire|archéologie,fouilles
+Géographe|histoire|géographie
+Conservateur·rice de musée|histoire|musée,patrimoine,conservateur
+Guide-conférencier·ère|tour|guide touristique,guide
+Bibliothécaire, documentaliste|lettres|bibliothèque,livres,documentaliste
+Éditeur·rice|lettres|édition,maison d'édition
+Écrivain·e|lettres|auteur,écrire,romancier,poète,écrivain,autrice
+Philosophe|lettres|philosophie
+Libraire|lettres|librairie
+Agent·e de voyage|tour|voyage,tourisme,voyages
+Chef·fe cuisinier·ère|hotel|cuisinier,cuisine,chef,restaurant,cuisinière
+Pâtissier·ère|hotel|pâtisserie,boulanger,boulangerie,chocolatier
+Directeur·rice d'hôtel|hotel|hôtel,hôtellerie
+Réceptionniste|hotel|accueil
+Sommelier·ère|hotel|vin
+Designer graphique, graphiste|design|graphisme,dessin,illustration,graphiste
+Illustrateur·rice, auteur·rice de BD|design|bande dessinée,BD,manga,dessinateur,dessinatrice,mangaka
+Designer produit|design|design industriel,designer
+Artiste peintre, sculpteur·rice|design|peintre,sculpteur,artiste,peinture
+Tatoueur·se|design|tatouage,tattoo
+Styliste|mode|mode,vêtements,couture,fashion,créateur de mode,créatrice de mode
+Mannequin|mode|défilé
+Photographe|photo|photographie,photo
+Vidéaste, monteur·se|photo|montage,vidéo,youtube,monteur
+Réalisateur·rice|cinema|cinéma,film,films,réalisatrice
+Scénariste|cinema|scénario
+Comédien·ne, acteur·rice|cinema|acteur,actrice,théâtre,comédienne
+Producteur·rice audiovisuel·le|cinema|production
+Ingénieur·e du son|musique|son,DJ,producteur de musique,beatmaker
+Musicien·ne|musique|musique,chanteur,chanteuse,instrument,rappeur,piano,guitare
+Danseur·se|musique|danse,danseuse,chorégraphe
+Sportif·ve professionnel·le|staps|footballeur,football,foot,sport,athlète,joueur,basket,tennis
+Coach sportif|staps|entraîneur,préparateur physique,fitness,coach
+Arbitre|staps|
+Moniteur·rice de sport (ski, plongée, surf…)|staps|plongée,moniteur,surf,ski
+Agent·e de joueurs|commerce|agent sportif
+`;
+
+/* Filières au Maroc. t = type ; d = domaines ; s = spécialités utiles */
+const MA_TYPES = {
+  ouvert:"Public · accès ouvert",
+  regule:"Public · accès régulé",
+  cpge:"Classes préparatoires",
+  apres:"Après bac+2 ou plus",
+  ppp:"Université en partenariat public-privé",
+  fr:"Réseau ou campus français",
+  prive:"Privé"
+};
+const MAROC = [
+  {k:"fmp",n:"Facultés de médecine et de pharmacie (FMP) et de médecine dentaire (FMD)",t:"regule",d:["sante"],s:["svt","pc","maths"],a:"Candidature sur CursusSup, présélection sur les notes du bac, puis concours écrit commun.",dip:"Doctorat en médecine (7 ans), pharmacie ou médecine dentaire",v:"Rabat, Casablanca, Fès, Marrakech, Oujda, Agadir, Tanger et d'autres villes",x:"Ces facultés sont très sélectives : la moyenne des matières scientifiques pèse lourd dans la présélection."},
+  {k:"ispits",n:"ISPITS – Instituts supérieurs des professions infirmières et techniques de santé",t:"regule",d:["sante"],s:["svt","pc"],a:"Concours (présélection, épreuve écrite, test d'aptitude).",dip:"Licence (3 ans) : infirmier polyvalent, sage-femme, kinésithérapie, orthophonie, ergothérapie, psychomotricité, techniques de santé…",v:"Une vingtaine de villes",x:""},
+  {k:"um6ss",n:"UM6SS – Université Mohammed VI des sciences de la santé",t:"ppp",d:["sante"],s:["svt","pc"],a:"Dossier et épreuves propres à l'université.",dip:"Médecine, pharmacie, dentaire, soins infirmiers et paramédical",v:"Casablanca",x:"Frais de scolarité élevés ; des bourses existent."},
+  {k:"ensa",n:"ENSA – Écoles nationales des sciences appliquées",t:"regule",d:["inge","info"],s:["maths","pc","si","nsi"],a:"Candidature sur CursusSup, présélection sur les notes, puis concours commun.",dip:"Diplôme d'ingénieur d'État (5 ans : 2 ans de prépa intégrée et 3 ans de cycle ingénieur)",v:"Réseau national : Agadir, Marrakech, Tanger, Kénitra, Fès, Oujda, El Jadida, Safi, Tétouan, Berrechid…",x:""},
+  {k:"ensam",n:"ENSAM – Écoles nationales supérieures d'arts et métiers",t:"regule",d:["inge"],s:["maths","pc","si"],a:"Candidature sur CursusSup, présélection, puis concours.",dip:"Diplôme d'ingénieur d'État arts et métiers (5 ans)",v:"Meknès, Casablanca, Rabat",x:""},
+  {k:"cpge",n:"CPGE publiques marocaines",t:"cpge",d:["sci","inge","info","eco"],s:["maths","pc","si","nsi","ses"],a:"Sur dossier, sans concours écrit, sur la plateforme nationale des CPGE (cpge.ac.ma), avec une limite d'âge.",dip:"2 ans : MPSI, PCSI, TSI (scientifiques), ECS et ECT (économiques), puis concours des grandes écoles marocaines et françaises",v:"Nombreux centres, dont le Lycée d'excellence de Benguérir",x:"Vérifie sur la plateforme les conditions pour les titulaires d'un bac étranger."},
+  {k:"cpgefr",n:"CPGE du réseau français au Maroc",t:"fr",d:["eco","sci","inge"],s:["maths","ses","pc"],a:"Candidature sur Parcoursup.",dip:"2 ans de prépa vers les grandes écoles françaises",v:"Lycée Descartes (Rabat) : prépa ECG. Lycée Lyautey (Casablanca) : à vérifier auprès du lycée.",x:""},
+  {k:"gecole",n:"Grandes écoles d'ingénieurs après CPGE (EMI, EHTP, ENSIAS, INPT, ENSEM…)",t:"apres",d:["inge","info"],s:["maths","pc","nsi","si"],a:"Concours national commun (CNC) après 2 ans de CPGE.",dip:"Diplôme d'ingénieur d'État (3 ans après la prépa)",v:"Rabat, Casablanca et d'autres villes",x:""},
+  {k:"encg",n:"ENCG – Écoles nationales de commerce et de gestion",t:"regule",d:["eco","intl"],s:["ses","maths","amc"],a:"Candidature sur CursusSup, présélection sur les notes, puis test écrit commun (TAFEM).",dip:"Diplôme de l'ENCG (5 ans) : gestion, finance, marketing, commerce international…",v:"Réseau national : Settat, Casablanca, Kénitra, Tanger, Agadir, Marrakech, Fès, Oujda, El Jadida, Béni Mellal, Dakhla…",x:""},
+  {k:"iscae",n:"ISCAE – Institut supérieur de commerce et d'administration des entreprises",t:"apres",d:["eco"],s:["maths","ses"],a:"Principalement par concours après une CPGE économique.",dip:"Programme grande école",v:"Casablanca, Rabat",x:""},
+  {k:"est",n:"EST – Écoles supérieures de technologie",t:"regule",d:["info","inge","eco"],s:["maths","pc","nsi","si","ses"],a:"Sur dossier (présélection sur les notes) via CursusSup.",dip:"DUT (2 ans), puis licence professionnelle possible : génie informatique, génie électrique, techniques de management…",v:"Une vingtaine de villes",x:""},
+  {k:"fst",n:"FST – Facultés des sciences et techniques",t:"regule",d:["sci","inge","info","envi"],s:["maths","pc","svt","nsi"],a:"Sur dossier (présélection sur les notes) via CursusSup.",dip:"Tronc commun scientifique, puis licence, master ou cycle ingénieur",v:"Settat, Mohammedia, Fès, Marrakech, Tanger, Errachidia, Béni Mellal…",x:""},
+  {k:"fs",n:"Facultés des sciences",t:"ouvert",d:["sci","envi","info"],s:["maths","pc","svt","nsi"],a:"Inscription directe auprès de l'université.",dip:"Licences en mathématiques, physique, chimie, biologie, géologie, informatique, puis master",v:"Toutes les universités publiques",x:""},
+  {k:"fsjes",n:"FSJES – Facultés des sciences juridiques, économiques et sociales",t:"ouvert",d:["droit","eco"],s:["ses","hggsp","maths"],a:"Inscription directe auprès de l'université.",dip:"Licences en droit (en arabe ou en français), économie, gestion, puis master",v:"Toutes les universités publiques",x:"Vérifie la langue d'enseignement du parcours choisi."},
+  {k:"flsh",n:"FLSH – Facultés des lettres et des sciences humaines",t:"ouvert",d:["lettres","shs","intl"],s:["hlp","hggsp","llcer","amc","ses"],a:"Inscription directe auprès de l'université.",dip:"Licences en langues, littératures, histoire, géographie, philosophie, sociologie, psychologie…",v:"Toutes les universités publiques",x:""},
+  {k:"ens",n:"ENS – Écoles normales supérieures (filières éducation)",t:"regule",d:["shs"],s:["hlp","hggsp","maths","svt","pc","llcer"],a:"Sur dossier, avec parfois un entretien.",dip:"Licence en éducation (3 ans) pour devenir enseignant·e",v:"Plusieurs universités",x:"Les filières proposées changent selon les années : vérifie auprès de chaque université."},
+  {k:"ena",n:"ENA – Écoles nationales d'architecture",t:"regule",d:["archi"],s:["maths","artspla","pc"],a:"Présélection puis concours.",dip:"Diplôme d'architecte (6 ans)",v:"Rabat, Fès, Marrakech, Tétouan, Agadir, Oujda",x:""},
+  {k:"inau",n:"INAU – Institut national d'aménagement et d'urbanisme",t:"apres",d:["archi","shs"],s:["hggsp","ses","maths"],a:"Concours après une licence ou un diplôme équivalent.",dip:"Diplôme d'urbaniste",v:"Rabat",x:""},
+  {k:"iav",n:"IAV Hassan II – Institut agronomique et vétérinaire",t:"regule",d:["envi","sante"],s:["svt","pc","maths"],a:"Sélection sur dossier et concours pour la première année (cycle préparatoire APESA).",dip:"Ingénieur agronome, docteur vétérinaire, ingénieur topographe…",v:"Rabat (et Agadir)",x:""},
+  {k:"ismac",n:"ISMAC – Institut supérieur des métiers de l'audiovisuel et du cinéma",t:"regule",d:["arts","com"],s:["cav","artspla","hlp"],a:"Concours propre à l'institut.",dip:"Licence : réalisation, image, son, montage, production",v:"Rabat",x:""},
+  {k:"isadac",n:"ISADAC – Institut supérieur d'art dramatique et d'animation culturelle",t:"regule",d:["arts"],s:["hlp","arts","cav"],a:"Concours propre à l'institut.",dip:"Interprétation, scénographie, animation culturelle",v:"Rabat",x:""},
+  {k:"inba",n:"Institut national des beaux-arts",t:"regule",d:["arts"],s:["artspla"],a:"Concours ou dossier artistique.",dip:"Arts plastiques, design, bande dessinée",v:"Tétouan",x:"Renseigne-toi aussi sur les écoles des beaux-arts municipales (Casablanca…)."},
+  {k:"isic",n:"ISIC – Institut supérieur de l'information et de la communication",t:"regule",d:["com"],s:["hggsp","hlp","amc","llcer"],a:"Concours propre à l'institut.",dip:"Licence en journalisme et en communication",v:"Rabat",x:""},
+  {k:"isit",n:"ISIT – Institut supérieur international du tourisme",t:"regule",d:["intl"],s:["amc","llcer","ses"],a:"Concours propre à l'institut.",dip:"Management touristique et hôtelier",v:"Tanger",x:""},
+  {k:"inas",n:"INAS – Institut national de l'action sociale",t:"regule",d:["shs"],s:["ses","hggsp","hlp"],a:"Concours propre à l'institut.",dip:"Licence en travail social",v:"Tanger",x:""},
+  {k:"ofppt",n:"OFPPT – Instituts de formation professionnelle (niveau technicien spécialisé)",t:"regule",d:["info","inge","eco","arts","intl"],s:[],a:"Sur dossier.",dip:"Technicien spécialisé (2 ans) : informatique, gestion, hôtellerie, BTP, automobile, aéronautique, design…",v:"Partout au Maroc",x:"C'est une voie professionnalisante rapide, et l'on peut poursuivre ensuite ses études."},
+  {k:"bts",n:"BTS publics marocains (en lycée)",t:"regule",d:["inge","eco","info"],s:["maths","pc","si","ses"],a:"Sur dossier.",dip:"BTS (2 ans) : électrotechnique, systèmes informatiques, gestion…",v:"Lycées techniques de plusieurs villes",x:""},
+  {k:"mil",n:"Écoles militaires et de police",t:"regule",d:["droit","inge"],s:["maths","pc","eppcs"],a:"Concours, épreuves sportives et visite médicale ; la nationalité marocaine est exigée.",dip:"Académie royale militaire (Meknès), École royale de l'air (Marrakech), École royale navale (Casablanca)… ; concours de la Sûreté nationale selon le grade",v:"Plusieurs villes",x:""},
+  {k:"uir",n:"UIR – Université internationale de Rabat",t:"ppp",d:["droit","eco","inge","info","archi","intl"],s:["maths","ses","hggsp","amc","pc"],a:"Concours ou dossier propre à chaque école.",dip:"Sciences Po Rabat, Rabat Business School, écoles d'ingénieurs, architecture…",v:"Rabat",x:"Frais de scolarité ; des bourses existent."},
+  {k:"um6p",n:"UM6P – Université Mohammed VI Polytechnique",t:"ppp",d:["inge","info","sci","eco","shs","envi"],s:["maths","pc","nsi","ses","svt"],a:"Dossier, tests et entretiens.",dip:"Cycle préparatoire intégré, ingénierie, sciences sociales et économie, agriculture…",v:"Benguérir, Rabat",x:"Des bourses importantes existent."},
+  {k:"aui",n:"Université Al Akhawayn",t:"ppp",d:["eco","info","shs","intl","com"],s:["amc","llcer","maths","ses"],a:"Dossier avec un très bon niveau d'anglais.",dip:"Bachelors sur le modèle américain, enseignés en anglais : business, sciences humaines, informatique…",v:"Ifrane",x:"Frais de scolarité ; des bourses existent."},
+  {k:"uemf",n:"UEMF – Université euro-méditerranéenne de Fès",t:"ppp",d:["inge","info","archi","eco"],s:["maths","pc","artspla","ses"],a:"Dossier et épreuves propres à chaque école.",dip:"Ingénierie (INSA Euro-Méditerranée), architecture, gestion…",v:"Fès",x:""},
+  {k:"centrale",n:"École Centrale Casablanca",t:"fr",d:["inge"],s:["maths","pc"],a:"Concours post-bac.",dip:"Ingénieur généraliste",v:"Casablanca",x:"Frais de scolarité ; des bourses existent."},
+  {k:"essec",n:"ESSEC Afrique (campus de Rabat)",t:"fr",d:["eco","intl"],s:["ses","maths","amc"],a:"Concours SESAME (Global BBA).",dip:"Bachelor en management (4 ans)",v:"Rabat",x:"Frais de scolarité élevés."},
+  {k:"tbs",n:"TBS Education (campus de Casablanca)",t:"fr",d:["eco"],s:["ses","amc","maths"],a:"Dossier et entretien.",dip:"Bachelor en management",v:"Casablanca",x:"Frais de scolarité élevés."},
+  {k:"efa",n:"EFA – École française des affaires",t:"fr",d:["eco"],s:["ses","amc"],a:"Dossier, entretien et test d'anglais.",dip:"Bachelor en gestion et commerce",v:"Casablanca",x:""},
+  {k:"priv",n:"Écoles et universités privées",t:"prive",d:["eco","info","inge","arts","intl"],s:[],a:"Dossier, tests et entretiens.",dip:"Commerce, informatique, ingénierie, design, hôtellerie…",v:"Surtout Casablanca, Rabat, Marrakech",x:"Avant de t'inscrire, vérifie que le diplôme est reconnu par l'État marocain (« diplôme reconnu » ou « accrédité »)."}
 ];
 
 const TIMELINE = [
@@ -512,7 +818,7 @@ const TIMELINE = [
 ];
 const ETUDES = [
   {t:"🇫🇷 En France",p:["Avec le bac français, on candidate sur Parcoursup comme un élève de France, y compris depuis un lycée français à l'étranger.","Pense au logement et aux bourses : les démarches commencent souvent dès le printemps de Terminale.","Les attendus de chaque formation sont détaillés sur sa fiche Parcoursup."]},
-  {t:"🇲🇦 Au Maroc",p:["Universités publiques, écoles d'ingénieurs et de commerce publiques et privées, campus d'établissements étrangers : chaque établissement a sa propre procédure et son calendrier.","Certaines formations françaises (CPGE, BTS…) existent dans le réseau des établissements français au Maroc.","Renseigne-toi tôt auprès du service d'orientation du lycée : concours et dates limites peuvent tomber avant ceux de Parcoursup."]},
+  {t:"🇲🇦 Au Maroc",p:["Facultés en accès ouvert, écoles publiques sur CursusSup (médecine, ENSA, ENCG…), CPGE, universités en partenariat et campus français : chaque voie a sa procédure et son calendrier.","Les dates limites tombent souvent en juin et juillet, en même temps que les résultats du bac.",'<button class="btn small" data-s="maroc">Voir les filières au Maroc →</button>']},
   {t:"🌐 À l'international",p:["Canada (Québec), Belgique, Espagne, Royaume-Uni, États-Unis… : chaque pays a ses plateformes, ses exigences et ses frais d'inscription.","Un excellent niveau d'anglais, attesté par AMC ou LLCER et parfois par un test de langue, est souvent demandé.","Les candidatures se préparent souvent dès la Première : anticipe."]}
 ];
 
@@ -525,7 +831,7 @@ const S = {
   lycee: store.get("lycee") || "all",
   premiere: [], dropped: null,
   t1: store.get("t1"), t2: store.get("t2"), quiz: store.get("quiz"),
-  fiche: store.get("fiche") || {}, projet: store.get("projet") || "",
+  fiche: store.get("fiche") || {}, projet: store.get("projet") || "", metier: store.get("metier") || "", maOnly: null,
   profRows: []
 };
 const c0 = store.get("combo"); if(c0 && Array.isArray(c0.premiere)){S.premiere=c0.premiere; S.dropped=c0.dropped||null;}
@@ -543,6 +849,7 @@ function show(id){
   if(id==="fiche") renderFiche();
   if(id==="compare") renderCompare();
   if(id==="projet") renderProjet();
+  if(id==="maroc") renderMaroc();
   window.scrollTo(0,0);
 }
 document.addEventListener("click",e=>{
@@ -568,6 +875,12 @@ function act(name,d){
     case "exportCode": exportCode();break;
     case "copyCode": copyCode();break;
     case "analyze": analyzeCodes();break;
+    case "pickSug": pickSug(+d.i);break;
+    case "pickProj": pickProj(+d.i);break;
+    case "pickMetierName": pickMetierName(d.n);break;
+    case "keepMetier": keepMetier();break;
+    case "goMaroc": goMaroc(d.p);break;
+    case "maAll": S.maOnly=null;renderMaroc();break;
     case "csv": downloadCSV();break;
   }
 }
@@ -597,7 +910,7 @@ function applyLycee(){
   const L=LYCEES[S.lycee];
   document.querySelectorAll(".lycLbl").forEach(el=>el.textContent="🏫 "+L.lbl);
   $("#homeLyc").textContent="🏫 Établissement sélectionné : "+L.n+" (modifiable en haut de la page).";
-  renderPicker(); renderSpecList(); initCompareSelects(); renderCompare(); renderProjet(); renderFiche();
+  renderPicker(); renderSpecList(); initCompareSelects(); renderCompare(); renderProjet(); renderFiche(); renderMaroc();
   const cur=document.querySelector("main section.show");
   if(cur && cur.id==="tests" && $("#testRun").style.display==="block" && run && run.done) showResult(run.id);
 }
@@ -657,6 +970,7 @@ function domainCards(res){
       <details><summary>Formations et métiers</summary>
         <strong>Exemples de formations</strong><ul class="tight">${D.f.map(x=>`<li>${x}</li>`).join("")}</ul>
         <strong>Exemples de métiers</strong><ul class="tight">${D.m.map(x=>`<li>${x}</li>`).join("")}</ul>
+        <strong>🇲🇦 Au Maroc</strong><ul class="tight">${MAROC.filter(m=>m.d.includes(dk)).slice(0,5).map(m=>`<li>${m.n.split(" – ")[0]}</li>`).join("")}</ul>
         ${D.note?`<div class="note">${D.note}</div>`:""}
       </details></div>`;
   }).join("")+`</div>`;
@@ -696,13 +1010,79 @@ function openSpec(k){
 }
 function closeModal(){$("#modal").classList.remove("show")}
 
-/* ================= MON PROJET ================= */
+/* ================= MON MÉTIER ================= */
+const PIDX = Object.fromEntries(PROJETS.map((p,i)=>[p.id,i]));
+const MAK = Object.fromEntries(MAROC.map(m=>[m.k,m]));
+const norm = s=>String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/·[a-z]+/g,"").replace(/[^a-z0-9]+/g," ").trim();
+const METIERS = METIERS_RAW.trim().split("\n").map(l=>{const [n,p,syn]=l.split("|");return {n:n.trim(),p:PIDX[p.trim()],syn:(syn||"").trim()}}).filter(m=>m.p!==undefined);
+const SEARCH = METIERS.map(m=>({kind:"m",label:m.n,p:m.p,hay:norm(m.n+" "+m.syn.replace(/,/g," ")),syns:[norm(m.n)].concat(m.syn.split(",").map(norm))}))
+  .concat(PROJETS.map((p,i)=>({kind:"p",label:p.n,p:i,hay:norm(p.n)})));
+SEARCH.forEach(e=>e.tok=e.hay.split(" "));
+const STOP = new Set("de du des la le les l d en et un une je veux voudrais devenir faire metier metiers travailler dans avec pour au aux sur me plus tard etre".split(" "));
+function lev(a,b){const m=a.length,n=b.length;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function searchMetiers(q){
+  const qn=norm(q); if(qn.length<2) return [];
+  let qt=qn.split(" ").filter(t=>t&&!STOP.has(t)); if(!qt.length) qt=[qn];
+  const out=[];
+  SEARCH.forEach(e=>{
+    let sc=0;
+    if(e.hay.includes(qn)) sc=100+(norm(e.label).startsWith(qn)?20:0);
+    else{
+      for(const t of qt){
+        if(t.length>=3 && e.tok.some(h=>h.startsWith(t))) sc+=30;
+        else if(t.length>=4 && e.tok.some(h=>Math.abs(h.length-t.length)<=2 && lev(h,t)<=(t.length>=7?2:1))) sc+=18;
+        else if(t.length>=5 && e.tok.some(h=>h.length>=5 && t.startsWith(h))) sc+=15;
+        else {sc=0;break}
+      }
+    }
+    if(sc>0) out.push({...e,sc:sc+(e.kind==="m"?2:0)+(e.syns&&e.syns.includes(qn)?40:0)});
+  });
+  out.sort((a,b)=>b.sc-a.sc||a.label.length-b.label.length);
+  const seen=new Set(); return out.filter(e=>!seen.has(e.label)&&seen.add(e.label)).slice(0,12);
+}
+let sugRes=[];
 function initProjet(){
-  const sel=$("#projSel"), groups={};
-  PROJETS.forEach((p,i)=>{(groups[p.d]=groups[p.d]||[]).push(`<option value="${i}">${p.n}</option>`)});
-  sel.innerHTML=`<option value="">— Choisis une formation ou un métier —</option>`+DOM_KEYS.filter(d=>groups[d]).map(d=>`<optgroup label="${DOMAINS[d].n}">${groups[d].join("")}</optgroup>`).join("");
-  sel.value=S.projet;
-  sel.onchange=()=>{S.projet=sel.value;store.set("projet",S.projet);renderProjet()};
+  const groups={};
+  PROJETS.forEach((p,i)=>(groups[p.d]=groups[p.d]||[]).push(i));
+  $("#projBrowse").innerHTML=DOM_KEYS.filter(d=>groups[d]).map(d=>`<h3 style="margin:14px 0 6px">${DOMAINS[d].i} ${DOMAINS[d].n}</h3><div class="chips">${groups[d].map(i=>`<button class="chip click" data-act="pickProj" data-i="${i}">${PROJETS[i].n}</button>`).join("")}</div>`).join("");
+  const inp=$("#metierQ");
+  inp.value=S.metier||"";
+  inp.addEventListener("input",renderSug);
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"&&sugRes.length){e.preventDefault();pickSug(0)} });
+}
+function renderSug(){
+  const q=$("#metierQ").value, box=$("#metierSug");
+  sugRes=searchMetiers(q);
+  if(!q.trim()){box.innerHTML="";return}
+  if(sugRes.length){
+    box.innerHTML=sugRes.map((e,i)=>`<button class="chip click${e.kind==="p"?" key":""}" data-act="pickSug" data-i="${i}">${e.kind==="p"?"📚 ":""}${e.label}</button>`).join("");
+  } else if(norm(q).length>=3){
+    box.innerHTML=`<div class="note" style="width:100%">Aucun métier trouvé pour « ${esc(q)} ». Essaie un mot plus simple ou un synonyme (par exemple « avion » plutôt que « commandant de bord »), ou parcours les domaines ci-dessous.
+      <div class="row" style="margin-top:8px"><button class="btn small" data-act="keepMetier">📌 Garder « ${esc(q)} » dans ma fiche</button></div>
+      <small>Ton enseignant verra ce métier dans ta fiche, et pourra l'ajouter à l'outil.</small></div>`;
+  } else box.innerHTML="";
+}
+function pickSug(i){
+  const e=sugRes[i]; if(!e) return;
+  S.metier = e.kind==="m"? e.label : ""; S.projet=String(e.p);
+  store.set("metier",S.metier); store.set("projet",S.projet);
+  $("#metierQ").value=e.label; $("#metierSug").innerHTML="";
+  renderProjet(); $("#projOut").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function pickProj(i){
+  S.metier=""; S.projet=String(i); store.set("metier",""); store.set("projet",S.projet);
+  $("#metierQ").value=""; $("#metierSug").innerHTML="";
+  renderProjet(); $("#projOut").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function pickMetierName(n){
+  const m=METIERS.find(x=>x.n===n); if(!m) return;
+  S.metier=m.n; S.projet=String(m.p); store.set("metier",S.metier); store.set("projet",S.projet);
+  $("#metierQ").value=m.n; renderProjet(); $("#projOut").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function keepMetier(){
+  const q=$("#metierQ").value.trim(); if(!q) return;
+  S.metier=q; S.projet=""; store.set("metier",q); store.set("projet","");
+  $("#metierSug").innerHTML=""; renderProjet();
 }
 function projScore(P,set){
   let s=0, miss=0;
@@ -720,28 +1100,79 @@ function bestTriples(P){
     return {t,s:sc+pairs[0].s,keep:pairs[0].p,drop:t.find(x=>!pairs[0].p.includes(x))};
   }).sort((a,b)=>b.s-a.s);
 }
+function maMini(m){
+  return `<div class="card" style="padding:12px"><strong>${m.n}</strong><br><span class="badge">${MA_TYPES[m.t]}</span>
+    <p style="margin:.4em 0 0;font-size:.9rem"><strong>Accès :</strong> ${m.a}</p><p style="margin:.2em 0 0;font-size:.9rem;color:var(--muted)">${m.v}</p></div>`;
+}
 function renderProjet(){
   const box=$("#projOut"); if(!box) return;
-  if(S.projet===""){box.innerHTML="";return}
+  if(S.projet===""){
+    box.innerHTML = S.metier ? `<div class="card"><h2 style="margin-top:0">📌 ${esc(S.metier)}</h2><p>Ce métier n'est pas encore dans l'outil, mais il est noté dans ta fiche. En attendant :</p>
+      <ul class="tight"><li>cherche un métier proche, ou le domaine qui s'en rapproche le plus, dans la liste ci-dessus ;</li><li>fais le <button class="chip click" data-test="riasec">test de profil d'intérêts</button> ;</li><li>parles-en à ton professeur principal ou au psychologue de l'Éducation nationale.</li></ul></div>` : "";
+    return;
+  }
   const P=PROJETS[+S.projet];
   const grp=g=>g.split("|").map(k=>`<span class="chip key"${isAv(k)?"":' style="opacity:.5"'}>${SPECS[k].i} ${SPECS[k].n}${isAv(k)?"":" (non proposée)"}</span>`).join(' <span style="color:var(--muted)">ou</span> ');
   const unavailC=P.c.filter(g=>!g.split("|").some(isAv));
-  const res=bestTriples(P), seen=new Set(), top=[];
-  for(const r of res){const key=r.keep.slice().sort().join();if(seen.has(key))continue;seen.add(key);top.push(r);if(top.length===3)break}
-  let h=`<div class="card"><h2 style="margin-top:0">${DOMAINS[P.d].i} ${P.n}</h2>
-    <h3>Spécialités conseillées</h3><div class="chips">${P.c.map(grp).join("")}</div>
-    ${P.u.length?`<h3 style="margin-top:10px">Également utiles</h3><div class="chips">${P.u.filter(k=>!P.c.some(g=>g.split("|").includes(k))).map(k=>`<span class="chip"${isAv(k)?"":" style=\"opacity:.5\""}>${SPECS[k].i} ${SPECS[k].n}</span>`).join("")}</div>`:""}
+  const utiles=P.u.filter(k=>!P.c.some(g=>g.split("|").includes(k)));
+  const freres=METIERS.filter(m=>m.p===+S.projet && m.n!==S.metier);
+  let h=`<div class="card">
+    ${S.metier?`<p class="lyc-banner" style="margin:0 0 6px">🎯 Métier : <strong>${esc(S.metier)}</strong></p>`:""}
+    <h2 style="margin-top:0">${DOMAINS[P.d].i} ${P.n}</h2>
+    ${P.c.length?`<h3>Spécialités conseillées</h3><div class="chips">${P.c.map(grp).join("")}</div>`:""}
+    ${utiles.length?`<h3 style="margin-top:10px">Également utiles</h3><div class="chips">${utiles.map(k=>`<span class="chip"${isAv(k)?"":" style=\"opacity:.5\""}>${SPECS[k].i} ${SPECS[k].n}</span>`).join("")}</div>`:""}
     ${P.note?`<div class="note">💡 ${P.note}</div>`:""}
     ${unavailC.length?`<div class="note">⚠️ Une spécialité conseillée n'est pas proposée dans l'établissement sélectionné. Ce projet reste possible, mais parles-en avec ton professeur principal.</div>`:""}
-  </div><h2>Combinaisons les plus cohérentes</h2><div class="grid g3">`;
-  top.forEach((r,i)=>{
-    h+=`<div class="card"><span class="badge">n°${i+1}</span>
+  </div>`;
+  if(!P.noCombo){
+    const res=bestTriples(P), seen=new Set(), top=[];
+    for(const r of res){const key=r.keep.slice().sort().join();if(seen.has(key))continue;seen.add(key);top.push(r);if(top.length===3)break}
+    h+=`<h2>Combinaisons les plus cohérentes</h2><div class="grid g3">`+top.map((r,i)=>`<div class="card"><span class="badge">n°${i+1}</span>
       <p style="margin:.5em 0 .2em"><strong>Première :</strong> ${r.t.map(k=>SPECS[k].i+" "+SPECS[k].n).join(", ")}</p>
       <p style="margin:.2em 0 .6em"><strong>Terminale :</strong> ${r.keep.map(k=>SPECS[k].n).join(" + ")}</p>
-      <button class="btn small" data-combo="${r.t.join(",")}" data-drop="${r.drop}">Voir dans l'explorateur →</button></div>`;
-  });
-  box.innerHTML=h+`</div><p class="lyc-banner" style="margin-top:12px">La spécialité suggérée en 3e position pour la Première est souvent interchangeable : choisis-la selon tes goûts.</p>`;
+      <button class="btn small" data-combo="${r.t.join(",")}" data-drop="${r.drop}">Voir dans l'explorateur →</button></div>`).join("")+`</div>
+      <p class="lyc-banner" style="margin-top:12px">La spécialité suggérée en 3e position pour la Première est souvent interchangeable : choisis-la selon tes goûts.</p>`;
+  }
+  h+=`<h2>Où se former ?</h2><div class="grid g2">
+    <div class="card"><h3>🇫🇷 En France (Parcoursup)</h3><ul class="tight">${DOMAINS[P.d].f.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+    <div class="card"><h3>🇲🇦 Au Maroc</h3>${(P.ma||[]).map(k=>MAK[k]).filter(Boolean).slice(0,4).map(m=>`<p style="margin:.3em 0"><strong>${m.n}</strong><br><small style="color:var(--muted)">${MA_TYPES[m.t]} · ${m.a}</small></p>`).join("")}
+      <button class="btn small ghost" data-act="goMaroc" data-p="${S.projet}" style="margin-top:6px">Toutes les filières au Maroc →</button></div></div>`;
+  if(freres.length) h+=`<h3 style="margin-top:16px">Métiers proches</h3><div class="chips">${freres.slice(0,16).map(m=>`<button class="chip click" data-act="pickMetierName" data-n="${esc(m.n)}">${m.n}</button>`).join("")}</div>`;
+  box.innerHTML=h;
 }
+
+/* ================= AU MAROC ================= */
+function initMaroc(){
+  $("#maDom").innerHTML=`<option value="">Tous les domaines</option>`+DOM_KEYS.map(d=>`<option value="${d}">${DOMAINS[d].i} ${DOMAINS[d].n}</option>`).join("");
+  $("#maType").innerHTML=`<option value="">Tous les types</option>`+Object.entries(MA_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+  ["maQ","maDom","maType"].forEach(id=>$("#"+id).addEventListener("input",()=>{S.maOnly=null;renderMaroc()}));
+  $("#maIntro").innerHTML=MA_INTRO.map(c=>`<div class="card"><h3>${c.t}</h3>${c.h}</div>`).join("");
+}
+function goMaroc(p){
+  const P=PROJETS[+p]; S.maOnly=P?{n:P.n,keys:P.ma||[]}:null;
+  $("#maQ").value=""; $("#maDom").value=""; $("#maType").value="";
+  show("maroc"); renderMaroc();
+}
+function renderMaroc(){
+  const q=norm($("#maQ").value), d=$("#maDom").value, t=$("#maType").value;
+  let list=MAROC;
+  if(S.maOnly) list=S.maOnly.keys.map(k=>MAK[k]).filter(Boolean);
+  list=list.filter(m=>(!d||m.d.includes(d))&&(!t||m.t===t)&&(!q||norm(m.n+" "+m.dip+" "+m.v+" "+m.a).includes(q)));
+  $("#maCount").innerHTML = (S.maOnly?`Filières liées à <strong>${S.maOnly.n}</strong> · <button class="chip click" data-act="maAll">Voir toutes les filières</button> · `:"")+`${list.length} résultat${list.length>1?"s":""}`;
+  $("#maList").innerHTML=list.map(m=>`<div class="card">
+    <h3>${m.n}</h3><span class="badge">${MA_TYPES[m.t]}</span>
+    <div class="chips" style="margin:8px 0">${m.d.map(x=>`<span class="chip">${DOMAINS[x].i} ${DOMAINS[x].n}</span>`).join("")}</div>
+    <p style="margin:.3em 0"><strong>Accès :</strong> ${m.a}</p>
+    <p style="margin:.3em 0"><strong>Formation :</strong> ${m.dip}</p>
+    <p style="margin:.3em 0"><strong>Où :</strong> ${m.v}</p>
+    ${m.s.length?`<p style="margin:.5em 0 .2em"><strong>Spécialités utiles :</strong></p><div class="chips">${m.s.map(k=>`<span class="chip"${isAv(k)?"":' style="opacity:.5"'}>${SPECS[k].i} ${SPECS[k].n.split(" (")[0]}</span>`).join("")}</div>`:""}
+    ${m.x?`<div class="note">💡 ${m.x}</div>`:""}</div>`).join("") || `<p>Aucune filière ne correspond à ces critères.</p>`;
+}
+const MA_INTRO = [
+  {t:"🚪 Trois façons d'entrer",h:`<ul class="tight"><li><strong>Accès ouvert</strong> : facultés de sciences, de droit et d'économie, de lettres. On s'inscrit directement auprès de l'université.</li><li><strong>Accès régulé</strong> : écoles et instituts publics (médecine, ENSA, ENCG, EST, FST…). On candidate sur la plateforme nationale <strong>cursussup.gov.ma</strong> ; une présélection se fait sur les notes du bac, parfois suivie d'un concours.</li><li><strong>Privé et partenariat public-privé</strong> : dossier, tests, entretiens, et des frais de scolarité.</li></ul>`},
+  {t:"🎓 Avec un bac français",h:`<ul class="tight"><li>Sur CursusSup, on candidate comme titulaire d'un « bac étranger » : il faut téléverser ses notes avant la date limite.</li><li>La présélection repose sur les notes : <strong>tes résultats comptent jusqu'au bout</strong>.</li><li>Les résultats du bac français tombent début juillet, en même temps que de nombreuses dates limites marocaines : surveille le calendrier de près.</li><li>Les élèves non marocains suivent parfois une procédure particulière, et certaines écoles (militaires, police) exigent la nationalité marocaine.</li></ul>`},
+  {t:"📅 Calendrier type",h:`<ul class="tight"><li><strong>Janvier – avril de Terminale</strong> : Parcoursup, écoles privées et campus français (concours souvent au printemps).</li><li><strong>Juin – juillet</strong> : candidatures sur CursusSup et sur la plateforme des CPGE marocaines, résultats des présélections, puis concours écrits.</li><li><strong>Septembre</strong> : rentrée.</li></ul><div class="note">Le plus sûr est de mener tes candidatures en France et au Maroc en parallèle. Les dates exactes changent chaque année : vérifie-les sur les sites officiels.</div>`}
+];
 
 /* ================= COMPARER ================= */
 function initCompareSelects(){
@@ -878,12 +1309,13 @@ function ficheSummary(){
   const t1 = S.t1 ? S.t1.rank.filter(x=>isAv(x.k)).slice(0,3).map(x=>SPECS[x.k].n).join(", ") : "<em>non réalisé</em>";
   const t2 = S.t2 ? `${S.t2.rank.slice(0,3).map(x=>x.k).join("")} (${S.t2.rank.slice(0,2).map(x=>RIA[x.k].n).join(", ")})` : "<em>non réalisé</em>";
   const pj = S.projet!=="" ? PROJETS[+S.projet].n : "<em>aucun</em>";
+  const mt = S.metier ? esc(S.metier) : "<em>aucun</em>";
   const qz = S.quiz ? `${S.quiz.score} / ${S.quiz.n}` : "<em>non réalisé</em>";
   let doms="";
   if(P.length===3){ const list=d?P.filter(x=>x!==d):P; doms=scoreCombo(list).slice(0,4).map(x=>DOMAINS[x.dk].n).join(", "); }
   return `<p><strong>Ma combinaison</strong><br>${comb}</p>${doms?`<p><strong>Domaines les plus ouverts</strong><br>${doms}</p>`:""}
     <p><strong>Test « spécialités »</strong><br>${t1}</p><p><strong>Profil d'intérêts</strong><br>${t2}</p>
-    <p><strong>Projet exploré</strong><br>${pj}</p><p><strong>Quiz idées reçues</strong><br>${qz}</p>`;
+    <p><strong>Métier visé</strong><br>${mt}</p><p><strong>Parcours exploré</strong><br>${pj}</p><p><strong>Quiz idées reçues</strong><br>${qz}</p>`;
 }
 function renderFiche(){
   const box=$("#ficheAuto"); if(!box) return;
@@ -907,7 +1339,7 @@ function b64d(s){return decodeURIComponent(escape(atob(s)))}
 function exportCode(){
   const o={p:S.fiche.prenom||"",c:S.fiche.classe||"",l:S.lycee,pr:S.premiere,d:S.dropped,
     t1:S.t1?S.t1.rank.filter(x=>isAv(x.k)).slice(0,3).map(x=>x.k):[],t2:S.t2?S.t2.rank.slice(0,3).map(x=>x.k).join(""):"",
-    pj:S.projet!==""?+S.projet:null,qz:S.quiz?S.quiz.score:null};
+    pj:S.projet!==""?+S.projet:null,mt:S.metier||"",qz:S.quiz?S.quiz.score:null};
   const code="CAP2:"+b64e(JSON.stringify(o));
   $("#codeBox").innerHTML=`<div class="card" style="margin-top:14px"><h3>Mon code</h3>
     ${!o.p?`<div class="note">⚠️ Pense à indiquer ton prénom et ton nom dans la fiche avant d'envoyer ton code.</div>`:""}
@@ -923,9 +1355,9 @@ function copyCode(){
 }
 function clearAll(){
   if(!confirm("Effacer ta fiche, tes résultats de tests et ta combinaison ?")) return;
-  S.t1=S.t2=S.quiz=null; S.fiche={}; S.projet=""; S.premiere=[]; S.dropped=null;
-  ["t1","t2","quiz","fiche","projet","combo"].forEach(k=>store.set(k,null));
-  $("#projSel").value=""; $("#codeBox").innerHTML="";
+  S.t1=S.t2=S.quiz=null; S.fiche={}; S.projet=""; S.metier=""; S.premiere=[]; S.dropped=null;
+  ["t1","t2","quiz","fiche","projet","metier","combo"].forEach(k=>store.set(k,null));
+  $("#metierQ").value=""; $("#metierSug").innerHTML=""; $("#codeBox").innerHTML="";
   renderPicker(); renderProjet(); renderFiche();
 }
 
@@ -942,14 +1374,17 @@ function analyzeCodes(){
   const pr=cnt(rows.flatMap(r=>r.pr||[]));
   const tle=cnt(rows.filter(r=>r.pr&&r.pr.length===3&&r.d).map(r=>r.pr.filter(x=>x!==r.d).map(nm).sort().join(" + ")));
   const ria=cnt(rows.map(r=>r.t2?r.t2[0]:null));
+  const mts=cnt(rows.map(r=>r.mt||null));
+  const known=new Set(METIERS.map(m=>m.n));
   const bar=(lab,n,max)=>`<div class="res-row"><div class="lbl">${lab}</div><div class="meter"><i style="width:${n/max*100}%"></i></div><div class="val">${n}</div></div>`;
   let h=`<h2>${rows.length} élève${rows.length>1?"s":""}</h2>${bad.length?`<div class="note">${bad.length} code(s) illisible(s) ignoré(s).</div>`:""}
    <div class="grid g2"><div class="card"><h3>Spécialités choisies en Première</h3>${pr.map(([k,n])=>bar(nm(k),n,rows.length)).join("")||"<p>—</p>"}</div>
    <div class="card"><h3>Combinaisons de Terminale</h3>${tle.map(([k,n])=>bar(k,n,rows.length)).join("")||"<p>Aucune combinaison de Terminale renseignée.</p>"}
    <h3 style="margin-top:14px">Type RIASEC dominant</h3>${ria.map(([k,n])=>bar(k+" · "+RIA[k].n,n,rows.length)).join("")||"<p>—</p>"}</div></div>
-   <div class="card tablewrap" style="margin-top:14px"><table><thead><tr><th>Élève</th><th>Classe</th><th>Première</th><th>Terminale</th><th>Test spécialités</th><th>RIASEC</th><th>Projet</th><th>Quiz</th></tr></thead><tbody>`;
+   ${mts.length?`<div class="card" style="margin-top:14px"><h3>Métiers visés</h3>${mts.map(([k,n])=>bar(esc(k)+(known.has(k)?"":" 📌"),n,rows.length)).join("")}<p class="lyc-banner">📌 = métier tapé par l'élève mais absent de la base : à ajouter dans une prochaine version.</p></div>`:""}
+   <div class="card tablewrap" style="margin-top:14px"><table><thead><tr><th>Élève</th><th>Classe</th><th>Première</th><th>Terminale</th><th>Test spécialités</th><th>RIASEC</th><th>Métier visé</th><th>Parcours</th><th>Quiz</th></tr></thead><tbody>`;
   rows.forEach(r=>{
-    h+=`<tr><td>${esc(r.p)||"—"}</td><td>${esc(r.c)}</td><td>${(r.pr||[]).map(nm).join(", ")}</td><td>${r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"—"}</td><td>${(r.t1||[]).map(nm).join(", ")||"—"}</td><td>${esc(r.t2)||"—"}</td><td>${r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"—"}</td><td>${r.qz!=null?r.qz+"/"+QUIZ.length:"—"}</td></tr>`;
+    h+=`<tr><td>${esc(r.p)||"—"}</td><td>${esc(r.c)}</td><td>${(r.pr||[]).map(nm).join(", ")}</td><td>${r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"—"}</td><td>${(r.t1||[]).map(nm).join(", ")||"—"}</td><td>${esc(r.t2)||"—"}</td><td>${esc(r.mt)||"—"}</td><td>${r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"—"}</td><td>${r.qz!=null?r.qz+"/"+QUIZ.length:"—"}</td></tr>`;
   });
   box.innerHTML=h+`</tbody></table></div>`;
 }
@@ -957,14 +1392,14 @@ function downloadCSV(){
   if(!S.profRows.length) analyzeCodes();
   if(!S.profRows.length) return;
   const nm=k=>SPECS[k]?SPECS[k].n:k, q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`;
-  const lines=[["Élève","Classe","Établissement","Première","Terminale","Test spécialités","RIASEC","Projet","Quiz"].map(q).join(";")];
-  S.profRows.forEach(r=>lines.push([r.p,r.c,LYCEES[r.l]?LYCEES[r.l].n:r.l,(r.pr||[]).map(nm).join(", "),r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"",(r.t1||[]).map(nm).join(", "),r.t2,r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"",r.qz!=null?r.qz+"/"+QUIZ.length:""].map(q).join(";")));
+  const lines=[["Élève","Classe","Établissement","Première","Terminale","Test spécialités","RIASEC","Métier visé","Parcours","Quiz"].map(q).join(";")];
+  S.profRows.forEach(r=>lines.push([r.p,r.c,LYCEES[r.l]?LYCEES[r.l].n:r.l,(r.pr||[]).map(nm).join(", "),r.d?(r.pr||[]).filter(x=>x!==r.d).map(nm).join(", "):"",(r.t1||[]).map(nm).join(", "),r.t2,r.mt||"",r.pj!=null&&PROJETS[r.pj]?PROJETS[r.pj].n:"",r.qz!=null?r.qz+"/"+QUIZ.length:""].map(q).join(";")));
   const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="cap-specialites-classe.csv"; document.body.appendChild(a); a.click(); a.remove();
 }
 
 /* ================= INIT ================= */
-initLycee(); initProjet(); renderReperes(); applyLycee();
+initLycee(); initProjet(); initMaroc(); renderReperes(); applyLycee();
 </script>
 </body>
 </html>
