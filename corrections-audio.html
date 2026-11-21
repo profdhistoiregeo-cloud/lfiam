@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Corrections audio et QR</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* Mise en page : barre d'onglets en haut, puis une vue à la fois. Correction = liste d'élèves à gauche, enregistreur à droite. */
 :root{
@@ -2720,7 +2721,7 @@ function isUrl(s){return /^https?:\/\/\S+$/i.test(s||"")}
 function clean(s){return String(s).replace(/[\\/:*?"<>|]+/g,"").replace(/\s+/g,"_").replace(/^_+|_+$/g,"")}
 
 /* ---------- état ---------- */
-let S = {v:1, classes:[], devoirs:[], sel:{classId:null, devoirId:null, studentId:null}, auto:true, cols:4, view:"correction"};
+let S = {v:1, classes:[], devoirs:[], sel:{classId:null, devoirId:null, studentId:null}, auto:true, cols:4, view:"correction", gClientId:"", gOn:false};
 try{ const raw=localStorage.getItem(KEY); if(raw){ const o=JSON.parse(raw); if(o&&o.v===1) S=Object.assign(S,o); } }catch(e){}
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 const cls = () => S.classes.find(c=>c.id===S.sel.classId) || null;
@@ -2806,8 +2807,26 @@ function renderClasses(){
         <label style="font-weight:400">Restaurer<input type="file" id="importJson" accept=".json"></label>
       </div>
     </div>`:""}
+    <div class="card">
+      <h2>Envoi automatique vers Google Drive</h2>
+      <p class="muted small" style="margin-top:0">Facultatif. Chaque audio part dans un dossier créé par l'outil pour chaque devoir. Nécessite la version en ligne (https) et un ID client Google.</p>
+      <div class="row"><label style="flex:1;min-width:260px">ID client Google<input type="text" id="gcid" value="${esc(S.gClientId||"")}" placeholder="123456789-xxxx.apps.googleusercontent.com"></label>
+        <button class="btn ghost" id="gConnect">Se connecter à Google</button></div>
+      <p class="small muted" id="gStatus" style="margin:8px 0 0">${location.protocol!=="https:"?"Tu utilises la version fichier : l'envoi vers Drive ne fonctionne que sur la version en ligne.":(S.gClientId?(gTok?"Connecté à Google.":"Pas encore connecté."):"Renseigne l'ID client, puis connecte-toi.")}</p>
+      <details><summary>Comment obtenir l'ID client</summary>
+        <ol class="small">
+          <li>Va sur console.cloud.google.com et crée un projet.</li>
+          <li>Menu « API et services » &gt; Bibliothèque : active « Google Drive API ».</li>
+          <li>« Écran de consentement OAuth » : type Externe, puis ajoute ton adresse Gmail comme utilisateur test.</li>
+          <li>« Identifiants » &gt; Créer des identifiants &gt; ID client OAuth &gt; Application Web.</li>
+          <li>Dans « Origines JavaScript autorisées », mets l'adresse de ta page (ex. https://ton-pseudo.github.io), sans rien après.</li>
+          <li>Copie l'ID client obtenu et colle-le ci-dessus. Au premier accès, Google affiche « application non validée » : clique sur Avancé, puis continuer.</li>
+        </ol></details>
+    </div>
   </div>`;
   const m = $("#main");
+  $("#gcid").onchange = e => { S.gClientId=e.target.value.trim(); gClient=null; gTok=null; S.gOn=false; save(); toast("ID client enregistré."); };
+  $("#gConnect").onclick = () => { const st=$("#gStatus"); st.textContent="Connexion en cours…"; gToken().then(()=>{st.textContent="Connecté à Google."}).catch(e=>{st.textContent=(e&&e.message)||String(e)}); };
   $("#selClass").onchange = e => { S.sel.classId=e.target.value; save(); render(); };
   $("#addClass").onclick = () => { const n=$("#newClass").value.trim(); if(!n) return; const o={id:uid(),name:n,students:[]}; S.classes.push(o); S.sel.classId=o.id; save(); render(); };
   $("#newClass").onkeydown = e => { if(e.key==="Enter") $("#addClass").click(); };
@@ -2869,7 +2888,8 @@ function renderCorrection(){
     <div class="card">
       <label for="folderIn" style="font-weight:600">Lien du dossier Drive de ce devoir (le même pour toute la classe)</label>
       <input type="url" id="folderIn" style="width:100%;margin-top:6px" value="${esc(d.folder||"")}" placeholder="https://drive.google.com/drive/folders/…">
-      <p class="muted small" style="margin:8px 0 0">Colle-le une seule fois : tous les élèves de la classe l'utilisent pour ce devoir. Chaque QR affiche le nom de l'élève, et son fichier porte aussi son nom dans le dossier.</p>
+      <p class="muted small" style="margin:8px 0 0">Colle-le une seule fois : tous les élèves de la classe l'utilisent pour ce devoir. Chaque QR affiche le nom de l'élève, et son fichier porte aussi son nom dans le dossier.${S.gClientId?" Avec l'envoi Drive activé, ce lien est créé et rempli automatiquement.":""}</p>
+      ${S.gClientId?`<div class="row" style="margin-top:10px;align-items:center"><button class="btn" id="syncBtn">Envoyer vers Drive${pendingCount(c,d)?` (${pendingCount(c,d)} en attente)`:""}</button><span class="small muted" id="upMsg">${esc(upLast)}</span></div>`:""}
     </div>
     <div class="grid2">
       <div class="card">
@@ -2877,7 +2897,7 @@ function renderCorrection(){
         ${c.students.length?`<ul class="students" id="stuList" role="listbox" aria-label="Élèves">${c.students.map(x=>{
           const has=audioKeys.has(akey(d.id,x.id)), l=linkFor(d,x);
           return `<li role="option" data-id="${x.id}" aria-selected="${x.id===S.sel.studentId}"><span class="name">${esc(x.name)}</span>
-          <span class="pill ${has?"on":""}">${has?"Audio":"—"}</span><span class="pill ${l?"on":(has?"warn":"")}">${l?"Lien":"—"}</span></li>`}).join("")}</ul>`
+          <span class="pill ${has?(S.gClientId&&!upDone(d,x)?"warn":"on"):""}">${has?(S.gClientId&&upDone(d,x)?"Drive":"Audio"):"—"}</span><span class="pill ${l?"on":(has?"warn":"")}">${l?"Lien":"—"}</span></li>`}).join("")}</ul>`
           :`<p class="muted">Cette classe n'a pas encore d'élèves.</p>`}
         <div class="row" style="margin-top:12px">
           <button class="btn ghost" id="bulkDev">Coller les liens en lot</button>
@@ -2901,6 +2921,7 @@ function renderCorrection(){
     if(v && !isUrl(v)){ toast("Ce n'est pas un lien valide (il doit commencer par https://)."); e.target.value=d.folder||""; return; }
     if(v) d.folder=v; else delete d.folder; save(); renderCorrection(); toast(v?"Lien du dossier enregistré pour toute la classe.":"Lien du dossier retiré.");
   };
+  const sb=$("#syncBtn"); if(sb) sb.onclick=syncDevoir;
   $("#bulkDev").onclick = () => bulkLinks("devoir");
   $("#exportZip").onclick = exportZip;
   const ul=$("#stuList");
@@ -2942,7 +2963,7 @@ async function bindPanel(){
   if(audioKeys.has(akey(d.id,s.id))){
     const v=await idb.get(akey(d.id,s.id)); const a=$("#aud");
     if(v && a){ a.src=URL.createObjectURL(v.blob); }
-    const da=$("#delAudio"); if(da) da.onclick=async()=>{ await idb.del(akey(d.id,s.id)); audioKeys.delete(akey(d.id,s.id)); renderCorrection(); };
+    const da=$("#delAudio"); if(da) da.onclick=async()=>{ await idb.del(akey(d.id,s.id)); audioKeys.delete(akey(d.id,s.id)); renderCorrection(); driveRemove(d,s); };
   }
 }
 function pickMime(){ const L=["audio/webm;codecs=opus","audio/webm","audio/mp4","audio/ogg;codecs=opus"]; return L.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t)) || ""; }
@@ -2953,7 +2974,7 @@ async function startRec(){
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
   catch(e){ toast("Micro inaccessible. Autorise-le dans la barre d'adresse du navigateur."); return; }
   const mime=pickMime(); const mr=new MediaRecorder(stream, mime?{mimeType:mime}:undefined);
-  const r={mr,stream,chunks:[],acc:0,seg:Date.now(),discard:false,key:akey(d.id,s.id),sid:s.id};
+  const r={mr,stream,chunks:[],acc:0,seg:Date.now(),discard:false,key:akey(d.id,s.id),sid:s.id,did:d.id};
   mr.ondataavailable=e=>{ if(e.data.size) r.chunks.push(e.data) };
   mr.onstop=()=>finishRec(r);
   try{ r.ctx=new (window.AudioContext||window.webkitAudioContext)(); const an=r.ctx.createAnalyser(); an.fftSize=512; r.ctx.createMediaStreamSource(stream).connect(an);
@@ -2988,9 +3009,11 @@ async function finishRec(r){
   rec=null;
   if(blob.size<500){ toast("Enregistrement vide, réessaie."); renderCorrection(); return; }
   try{ await idb.put(r.key,{blob,dur}); audioKeys.add(r.key); }catch(e){ toast("Impossible de stocker l'audio dans le navigateur."); renderCorrection(); return; }
+  const dv=S.devoirs.find(x=>x.id===r.did); if(dv&&dv.drive&&dv.drive.files&&dv.drive.files[r.sid]) dv.drive.files[r.sid].stale=true;
   const c=cls();
   if(S.auto && c){ const i=c.students.findIndex(x=>x.id===r.sid); if(i>=0 && i<c.students.length-1) S.sel.studentId=c.students[i+1].id; }
   save(); renderCorrection(); toast("Audio enregistré ("+fmtTime(dur)+").");
+  if(S.gClientId && S.gOn) syncDevoir();
 }
 document.addEventListener("keydown", e=>{
   if(S.view!=="correction"||$("#dlg").open) return;
@@ -3044,6 +3067,81 @@ async function exportZip(){
     download(makeZip(files), clean(`${c.name}_${d.title}`)+"_audios.zip"); msg.textContent=`${files.length} fichier(s) exporté(s). Dépose-les dans Drive, puis colle les liens.`;
   }catch(e){ msg.textContent="L'export a échoué : "+(e&&e.message?e.message:e); }
   btn.disabled=false;
+}
+
+/* ---------- Google Drive (dossier créé par l'outil, portée drive.file) ---------- */
+const GSCOPE="https://www.googleapis.com/auth/drive.file";
+let gTok=null,gExp=0,gClient=null,upBusy=false,upLast="";
+const gReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
+const upDone=(d,s)=>!!(d&&d.drive&&d.drive.files&&d.drive.files[s.id]&&!d.drive.files[s.id].stale);
+const pendingCount=(c,d)=>c&&d?c.students.filter(s=>audioKeys.has(akey(d.id,s.id))&&!upDone(d,s)).length:0;
+function setUp(msg){ upLast=msg||""; const e=$("#upMsg"); if(e) e.textContent=upLast; }
+function gToken(){
+  return new Promise((res,rej)=>{
+    if(gTok&&Date.now()<gExp-60000) return res(gTok);
+    if(location.protocol!=="https:") return rej(new Error("L'envoi vers Drive nécessite la version en ligne (https)."));
+    if(!S.gClientId) return rej(new Error("ID client Google manquant."));
+    if(!gReady()) return rej(new Error("Service Google non chargé : vérifie ta connexion internet."));
+    if(!gClient) gClient=google.accounts.oauth2.initTokenClient({client_id:S.gClientId,scope:GSCOPE,callback:()=>{}});
+    gClient.callback=r=>{ if(r.error) return rej(new Error("Connexion Google refusée ("+r.error+").")); gTok=r.access_token; gExp=Date.now()+(+r.expires_in||3600)*1000; S.gOn=true; save(); res(gTok); };
+    gClient.error_callback=()=>rej(new Error("Fenêtre Google fermée ou bloquée : clique sur « Envoyer vers Drive »."));
+    try{ gClient.requestAccessToken({prompt:S.gOn?"":"consent"}); }catch(e){ rej(e); }
+  });
+}
+async function gfetch(url,opt={}){
+  for(let k=0;k<2;k++){
+    const tok=await gToken(); const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:"Bearer "+tok}});
+    if(r.status===401&&k===0){ gTok=null; continue; }
+    return r;
+  }
+}
+async function gjson(r){ if(!r.ok){ let m=""; try{ m=(await r.json()).error.message; }catch(_){} throw new Error("Drive : "+(m||r.status)); } return r.json(); }
+async function ensureFolder(c,d){
+  if(!d.drive){
+    const r=await gfetch("https://www.googleapis.com/drive/v3/files?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${c.name} – ${d.title}`,mimeType:"application/vnd.google-apps.folder"})});
+    d.drive={folderId:(await gjson(r)).id,files:{},shared:false}; save();
+  }
+  if(!d.drive.shared){
+    const p=await gfetch(`https://www.googleapis.com/drive/v3/files/${d.drive.folderId}/permissions`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role:"reader",type:"anyone"})});
+    await gjson(p); d.drive.shared=true;
+  }
+  d.folder=`https://drive.google.com/drive/folders/${d.drive.folderId}?usp=sharing`; save();
+  return d.drive.folderId;
+}
+async function driveSend(name,blob,folderId,existing){
+  if(existing){
+    const r=await gfetch(`https://www.googleapis.com/upload/drive/v3/files/${existing}?uploadType=media&fields=id`,{method:"PATCH",headers:{"Content-Type":"audio/mpeg"},body:blob});
+    if(r.ok) return existing; if(r.status!==404) await gjson(r);
+  }
+  const b="b"+uid()+uid();
+  const body=new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n`,JSON.stringify({name,parents:[folderId]}),`\r\n--${b}\r\nContent-Type: audio/mpeg\r\n\r\n`,blob,`\r\n--${b}--`]);
+  const r=await gfetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{"Content-Type":"multipart/related; boundary="+b},body});
+  return (await gjson(r)).id;
+}
+async function driveRemove(d,s){
+  const f=d.drive&&d.drive.files&&d.drive.files[s.id]; if(!f) return;
+  delete d.drive.files[s.id]; save();
+  try{ await gfetch(`https://www.googleapis.com/drive/v3/files/${f.id}`,{method:"DELETE"}); }catch(_){}
+}
+async function syncDevoir(){
+  const c=cls(), d=dev(); if(!c||!d||upBusy||!S.gClientId) return;
+  const todo=c.students.filter(s=>audioKeys.has(akey(d.id,s.id))&&!upDone(d,s));
+  if(!todo.length){ setUp("Tout est envoyé sur Drive."); return; }
+  upBusy=true; let n=0, failed=false;
+  try{
+    setUp("Connexion à Drive…"); const folderId=await ensureFolder(c,d);
+    for(const s of todo){
+      setUp(`Envoi ${n+1}/${todo.length} : ${s.name}…`);
+      const v=await idb.get(akey(d.id,s.id)); if(!v) continue;
+      const mp3=await toMp3(v.blob); const f=d.drive.files[s.id];
+      const id=await driveSend(clean(`${c.name}_${d.title}_${s.name}`)+".mp3",mp3,folderId,f&&f.id);
+      d.drive.files[s.id]={id,at:Date.now()}; save(); n++;
+    }
+    setUp(`${n} fichier(s) envoyé(s) sur Drive.`);
+  }catch(e){ failed=true; setUp((e&&e.message)||String(e)); toast("Envoi Drive interrompu : "+((e&&e.message)||e),5000); }
+  upBusy=false;
+  if(!failed && pendingCount(c,d)) return syncDevoir();
+  if(!rec) renderCorrection();
 }
 
 /* ---------- planche QR ---------- */
