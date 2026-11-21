@@ -2735,7 +2735,9 @@ function ensureSel(){
   const c = cls();
   if(!c || !c.students.find(s=>s.id===S.sel.studentId)) S.sel.studentId = c?.students[0]?.id || null;
 }
-const linkFor = (d, s) => (d && d.links && d.links[s.id]) || (d && d.folder) || s.link || "";
+const fileLink = (d, s) => { const f = d && d.drive && d.drive.files && d.drive.files[s.id]; return f && f.shared && f.id ? `https://drive.google.com/file/d/${f.id}/view?usp=sharing` : ""; };
+const folderIdFrom = u => { const t = String(u || ""); const m = t.match(/\/folders\/([\w-]+)/) || t.match(/[?&]id=([\w-]+)/); return m ? m[1] : null; };
+const linkFor = (d, s) => (d && d.links && d.links[s.id]) || fileLink(d, s) || (d && d.folder) || s.link || "";
 
 /* ---------- stockage audio (IndexedDB, repli mémoire) ---------- */
 let db = null; const mem = new Map(); const audioKeys = new Set();
@@ -2809,7 +2811,7 @@ function renderClasses(){
     </div>`:""}
     <div class="card">
       <h2>Envoi automatique vers Google Drive</h2>
-      <p class="muted small" style="margin-top:0">Facultatif. Chaque audio part dans un dossier créé par l'outil pour chaque devoir. Nécessite la version en ligne (https) et un ID client Google.</p>
+      <p class="muted small" style="margin-top:0">Facultatif. Chaque audio part dans le dossier Drive indiqué pour le devoir (ou dans un dossier créé par l'outil), avec un lien propre à chaque élève. Nécessite la version en ligne (https) et un ID client Google. Google demandera l'accès à ton Drive : l'outil en a besoin pour écrire dans ton dossier.</p>
       <div class="row"><label style="flex:1;min-width:260px">ID client Google<input type="text" id="gcid" value="${esc(S.gClientId||"")}" placeholder="123456789-xxxx.apps.googleusercontent.com"></label>
         <button class="btn ghost" id="gConnect">Se connecter à Google</button></div>
       <p class="small muted" id="gStatus" style="margin:8px 0 0">${location.protocol!=="https:"?"Tu utilises la version fichier : l'envoi vers Drive ne fonctionne que sur la version en ligne.":(S.gClientId?(gTok?"Connecté à Google.":"Pas encore connecté."):"Renseigne l'ID client, puis connecte-toi.")}</p>
@@ -2886,9 +2888,9 @@ function renderCorrection(){
     </div></div>
     ${d?`
     <div class="card">
-      <label for="folderIn" style="font-weight:600">Lien du dossier Drive de ce devoir (le même pour toute la classe)</label>
+      <label for="folderIn" style="font-weight:600">Dossier Drive de ce devoir</label>
       <input type="url" id="folderIn" style="width:100%;margin-top:6px" value="${esc(d.folder||"")}" placeholder="https://drive.google.com/drive/folders/…">
-      <p class="muted small" style="margin:8px 0 0">Colle-le une seule fois : tous les élèves de la classe l'utilisent pour ce devoir. Chaque QR affiche le nom de l'élève, et son fichier porte aussi son nom dans le dossier.${S.gClientId?" Avec l'envoi Drive activé, ce lien est créé et rempli automatiquement.":""}</p>
+      <p class="muted small" style="margin:8px 0 0">Colle l'adresse de ton dossier une seule fois pour tout le devoir.${S.gClientId?" Les audios y sont envoyés, et chaque QR code ouvre l'audio de l'élève. Si tu laisses ce champ vide, l'outil crée un dossier à la racine de ton Drive.":" Sans envoi Drive, tous les QR de la classe ouvrent ce dossier."} Chaque QR affiche le nom de l'élève, et son fichier porte aussi son nom.${d.drive&&d.drive.folderId?` <a href="https://drive.google.com/drive/folders/${d.drive.folderId}" target="_blank" rel="noopener">Ouvrir le dossier dans Drive</a>.`:""}</p>
       ${S.gClientId?`<div class="row" style="margin-top:10px;align-items:center"><button class="btn" id="syncBtn">Envoyer vers Drive${pendingCount(c,d)?` (${pendingCount(c,d)} en attente)`:""}</button><span class="small muted" id="upMsg">${esc(upLast)}</span></div>`:""}
     </div>
     <div class="grid2">
@@ -2919,7 +2921,9 @@ function renderCorrection(){
   $("#folderIn").onchange = e => {
     const v=e.target.value.trim();
     if(v && !isUrl(v)){ toast("Ce n'est pas un lien valide (il doit commencer par https://)."); e.target.value=d.folder||""; return; }
-    if(v) d.folder=v; else delete d.folder; save(); renderCorrection(); toast(v?"Lien du dossier enregistré pour toute la classe.":"Lien du dossier retiré.");
+    if(d.drive && d.drive.folderId!==folderIdFrom(v)){ delete d.drive; }   // nouveau dossier : les audios seront renvoyés
+    if(v) d.folder=v; else delete d.folder; save(); renderCorrection();
+    toast(v?(S.gClientId?"Dossier enregistré : les audios y seront envoyés.":"Lien du dossier enregistré pour toute la classe."):"Lien du dossier retiré.");
   };
   const sb=$("#syncBtn"); if(sb) sb.onclick=syncDevoir;
   $("#bulkDev").onclick = () => bulkLinks("devoir");
@@ -2945,7 +2949,7 @@ function panelHtml(c,d,s){
     <div class="linkbox">
       <label for="linkIn" style="font-weight:600">Lien propre à cet élève (facultatif)</label>
       <input type="url" id="linkIn" value="${esc(own)}" placeholder="${esc(d.folder? "Vide : le lien du dossier est utilisé" : (s.link? "Lien permanent utilisé : "+s.link : "https://drive.google.com/…"))}">
-      <span class="small ${l?"":"muted"}">${l? (own?"Lien propre à cet élève pour ce devoir.":(d.folder?"Lien du dossier du devoir utilisé.":"Lien permanent de l'élève utilisé.")) : "Sans lien, l'élève n'aura pas de QR code sur la planche."}</span>
+      <span class="small ${l?"":"muted"}">${l? (own?"Lien propre à cet élève pour ce devoir.":(fileLink(d,s)?"Le QR code ouvre l'audio de cet élève sur Drive.":(d.folder?"Lien du dossier du devoir utilisé.":"Lien permanent de l'élève utilisé."))) : "Sans lien, l'élève n'aura pas de QR code sur la planche."}</span>
     </div>
     <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="auto" ${S.auto?"checked":""}> Passer à l'élève suivant après chaque enregistrement</label>`;
 }
@@ -3070,10 +3074,10 @@ async function exportZip(){
 }
 
 /* ---------- Google Drive (dossier créé par l'outil, portée drive.file) ---------- */
-const GSCOPE="https://www.googleapis.com/auth/drive.file";
+const GSCOPE="https://www.googleapis.com/auth/drive";
 let gTok=null,gExp=0,gClient=null,upBusy=false,upLast="";
 const gReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
-const upDone=(d,s)=>!!(d&&d.drive&&d.drive.files&&d.drive.files[s.id]&&!d.drive.files[s.id].stale);
+const upDone=(d,s)=>!!(d&&d.drive&&d.drive.files&&d.drive.files[s.id]&&d.drive.files[s.id].shared&&!d.drive.files[s.id].stale);
 const pendingCount=(c,d)=>c&&d?c.students.filter(s=>audioKeys.has(akey(d.id,s.id))&&!upDone(d,s)).length:0;
 function setUp(msg){ upLast=msg||""; const e=$("#upMsg"); if(e) e.textContent=upLast; }
 function gToken(){
@@ -3097,16 +3101,16 @@ async function gfetch(url,opt={}){
 }
 async function gjson(r){ if(!r.ok){ let m=""; try{ m=(await r.json()).error.message; }catch(_){} throw new Error("Drive : "+(m||r.status)); } return r.json(); }
 async function ensureFolder(c,d){
-  if(!d.drive){
-    const r=await gfetch("https://www.googleapis.com/drive/v3/files?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${c.name} – ${d.title}`,mimeType:"application/vnd.google-apps.folder"})});
-    d.drive={folderId:(await gjson(r)).id,files:{},shared:false}; save();
-  }
-  if(!d.drive.shared){
-    const p=await gfetch(`https://www.googleapis.com/drive/v3/files/${d.drive.folderId}/permissions`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role:"reader",type:"anyone"})});
-    await gjson(p); d.drive.shared=true;
-  }
-  d.folder=`https://drive.google.com/drive/folders/${d.drive.folderId}?usp=sharing`; save();
+  if(d.drive&&d.drive.folderId) return d.drive.folderId;
+  const own=folderIdFrom(d.folder);
+  if(own){ d.drive={folderId:own,files:{},manual:true}; save(); return own; }   // dossier indiqué par l'enseignant
+  const r=await gfetch("https://www.googleapis.com/drive/v3/files?fields=id",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:`${c.name} – ${d.title}`,mimeType:"application/vnd.google-apps.folder"})});
+  d.drive={folderId:(await gjson(r)).id,files:{}}; save();               // sinon : dossier créé à la racine
   return d.drive.folderId;
+}
+async function shareFile(id){
+  const p=await gfetch(`https://www.googleapis.com/drive/v3/files/${id}/permissions`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role:"reader",type:"anyone"})});
+  await gjson(p);
 }
 async function driveSend(name,blob,folderId,existing){
   if(existing){
@@ -3135,7 +3139,9 @@ async function syncDevoir(){
       const v=await idb.get(akey(d.id,s.id)); if(!v) continue;
       const mp3=await toMp3(v.blob); const f=d.drive.files[s.id];
       const id=await driveSend(clean(`${c.name}_${d.title}_${s.name}`)+".mp3",mp3,folderId,f&&f.id);
-      d.drive.files[s.id]={id,at:Date.now()}; save(); n++;
+      const ent=d.drive.files[s.id]={id,at:Date.now(),shared:!!(f&&f.shared&&f.id===id)}; save();
+      if(!ent.shared){ await shareFile(id); ent.shared=true; save(); }   // lien propre à chaque audio
+      n++;
     }
     setUp(`${n} fichier(s) envoyé(s) sur Drive.`);
   }catch(e){ failed=true; setUp((e&&e.message)||String(e)); toast("Envoi Drive interrompu : "+((e&&e.message)||e),5000); }
@@ -3160,7 +3166,7 @@ function renderSheet(){
       <label>QR par ligne<select id="cols">${[3,4,5,6].map(n=>`<option ${n===S.cols?"selected":""}>${n}</option>`).join("")}</select></label>
       <button class="btn" id="print" ${withLink.length?"":"disabled"}>Imprimer la planche</button>
     </div>
-    <p class="small ${without.length?"":"muted"}" style="margin:12px 0 0">${withLink.length} QR code(s) sur ${c.students.length} élèves.${without.length?` Sans lien : ${without.map(s=>esc(s.name)).join(", ")}.`:""}${withLink.length>1&&new Set(withLink.map(s=>linkFor(d,s))).size===1?" Tous les QR ouvrent le même dossier : le nom imprimé permet à chaque élève de retrouver son fichier.":""}</p></div>
+    <p class="small ${without.length?"":"muted"}" style="margin:12px 0 0">${withLink.length} QR code(s) sur ${c.students.length} élèves.${without.length?` Sans lien : ${without.map(s=>esc(s.name)).join(", ")}.`:""}${S.gClientId&&withLink.some(s=>!fileLink(d,s)&&!(d.links&&d.links[s.id]))?" Attention : certains QR ouvrent encore le dossier, car leur audio n'est pas envoyé sur Drive.":(withLink.length>1&&new Set(withLink.map(s=>linkFor(d,s))).size===1?" Tous les QR ouvrent le même dossier : le nom imprimé permet à chaque élève de retrouver son fichier.":"")}</p></div>
     <div class="card"><div id="sheet" style="--cols:${S.cols}">${withLink.map(s=>`<div class="qcard">${qrSvg(linkFor(d,s))}<div class="qn">${esc(s.name)}</div><div class="qd">${esc(c.name)} · ${esc(d.title)}<br>Scanne pour écouter ta correction</div></div>`).join("")||"<p class='muted'>Aucun lien enregistré pour ce devoir.</p>"}</div></div>
   </div>`;
   $("#selClass").onchange=e=>{S.sel.classId=e.target.value;S.sel.devoirId=null;save();render()};
